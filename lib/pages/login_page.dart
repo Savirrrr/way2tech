@@ -43,7 +43,8 @@ class _LoginpageState extends State<Loginpage> {
     String email = _emailController.text;
     String password = _passwordController.text;
     final response = await http.post(
-      Uri.parse('http://localhost:3000/login'), // Replace with your backend URL
+      Uri.parse(
+          'http://172.20.10.2:3000/login'), // Replace with your backend URL
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

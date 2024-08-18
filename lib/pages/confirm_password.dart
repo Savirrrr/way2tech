@@ -168,7 +168,7 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
 
     final response = await http.post(
       Uri.parse(
-          'myapp://resetpassword?token=${widget.token}'), // Replace with your actual API endpoint
+          'http://172.20.10.2:3000/resetpassword?token=${widget.token}'), // Replace with your actual API endpoint
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

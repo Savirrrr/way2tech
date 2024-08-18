@@ -7,7 +7,6 @@ import 'package:way2techv1/pages/forgot_password.dart';
 import 'dart:async';
 
 import 'pages/home.dart';
-
 import 'pages/login_page.dart';
 
 void main() {
@@ -58,7 +57,7 @@ class _MyAppState extends State<MyApp> {
     final uri = Uri.parse(link);
 
     // Deep link handling logic
-    switch (uri.path) {
+    switch (uri.host) {
       case '/resetpassword':
         final token = uri.queryParameters['token'];
         print("Token: $token");
@@ -94,6 +93,7 @@ class _MyAppState extends State<MyApp> {
         '/home': (context) => const HomePage(),
         '/login': (context) => const Loginpage(),
         '/forgotpassword': (context) => const ForgotPasswordPage(),
+        '/resetpassword': (context) => ConfirmPasswordPage(token: ''),
       },
     );
   }

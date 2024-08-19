@@ -23,8 +23,8 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data
                     android:scheme="http"
-                    android:host="192.168.106.119"
-                    android:pathPrefix="/resetpassword"/>
+                    android:host="myexample.com"
+                    android:pathPattern="/.."/>
             </intent-filter>
             
             <!-- Specifies an Android theme to apply to this Activity as soon as

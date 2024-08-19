@@ -51,6 +51,7 @@ class _MyAppState extends State<MyApp> {
         },
       ),
     ],
+    // urlPathStrategy: UrlPathStrategy.path,
     errorBuilder: (context, state) => Scaffold(
       body: Center(child: Text(state.error.toString())),
     ),
@@ -75,9 +76,9 @@ class _MyAppState extends State<MyApp> {
     }
 
     // Handle the case when the app is already running and receives a deep link
-    _sub = linkStream.listen((String? link) {
-      if (link != null) {
-        handleDeepLink(link);
+    _sub = linkStream.listen((String? uri) {
+      if (uri != null) {
+        handleDeepLink(uri);
       }
     }, onError: (err) {
       print("Error occurred in linkStream: $err");

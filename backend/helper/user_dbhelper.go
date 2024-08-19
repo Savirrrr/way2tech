@@ -248,7 +248,7 @@ func forgotpwd(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		resetURL := fmt.Sprintf("myapp://resetpassword?token=%s", token)
+		resetURL := fmt.Sprintf("http://192.168.106.119:3000/resetpassword?token=%s", token)
 		emailBody := fmt.Sprintf("Click the following link to reset your password: %s", resetURL)
 
 		// Print the reset URL to the console

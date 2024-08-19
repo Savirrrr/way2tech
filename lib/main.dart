@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'pages/home.dart';
 import 'pages/login_page.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,6 +23,38 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   StreamSubscription? _sub;
+
+  final GoRouter _router = GoRouter(
+    initialLocation: '/',
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const StartPage(),
+      ),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) => const HomePage(),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const Loginpage(),
+      ),
+      GoRoute(
+        path: '/forgotpassword',
+        builder: (context, state) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: '/resetpassword',
+        builder: (context, state) {
+          final token = state.uri.queryParameters['token'] ?? '';
+          return ConfirmPasswordPage(token: token);
+        },
+      ),
+    ],
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(child: Text(state.error.toString())),
+    ),
+  );
 
   @override
   void initState() {
@@ -57,16 +90,12 @@ class _MyAppState extends State<MyApp> {
     final uri = Uri.parse(link);
 
     // Deep link handling logic
-    switch (uri.host) {
+    switch (uri.path) {
       case '/resetpassword':
         final token = uri.queryParameters['token'];
         print("Token: $token");
         if (token != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ConfirmPasswordPage(token: token)),
-          );
+          _router.go('/resetpassword?token=$token');
         }
         break;
       // Add more cases here if you want to handle other paths
@@ -84,17 +113,10 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Way2Tech',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const StartPage(),
-        '/home': (context) => const HomePage(),
-        '/login': (context) => const Loginpage(),
-        '/forgotpassword': (context) => const ForgotPasswordPage(),
-        '/resetpassword': (context) => ConfirmPasswordPage(token: ''),
-      },
+      routerConfig: _router,
     );
   }
 }

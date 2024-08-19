@@ -115,7 +115,7 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Confirm Password'),
+        title: const Text('Confirm Password'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -124,27 +124,27 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
             TextField(
               controller: passwordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: 'New Password'),
+              decoration: const InputDecoration(labelText: 'New Password'),
             ),
             TextField(
               controller: confirmPasswordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: 'Confirm Password'),
+              decoration: const InputDecoration(labelText: 'Confirm Password'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             if (errorMessage != null)
               Text(
                 errorMessage!,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: isLoading ? null : _resetPassword,
               child: isLoading
-                  ? CircularProgressIndicator(
+                  ? const CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
-                  : Text('Reset Password'),
+                  : const Text('Reset Password'),
             ),
           ],
         ),
@@ -168,7 +168,7 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
 
     final response = await http.post(
       Uri.parse(
-          'http://172.20.10.2:3000/resetpassword?token=${widget.token}'), // Replace with your actual API endpoint
+          'http://172.20.10.2:3000/resetpassword'), // Replace with your actual API endpoint
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -177,12 +177,11 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
         'newPassword': passwordController.text,
       }),
     );
-
     if (response.statusCode == 200) {
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Password reset successful'),
       ));
       Navigator.pop(context); // Navigate back to login or home page

@@ -16,7 +16,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   Future<void> _forgotpwd() async {
     String email = _emailController.text;
     final response = await http.post(
-      Uri.parse('http://172.20.10.2:3000/forgotpwd'),
+      Uri.parse('http://192.168.106.119:3000/forgotpwd'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },

@@ -128,12 +128,12 @@ class _LoginpageState extends State<Loginpage> {
               const SizedBox(height: 20),
 
               // Password
-              Padding(
-                padding: const EdgeInsets.only(
+              const Padding(
+                padding: EdgeInsets.only(
                   left: 15.0,
                   bottom: 4.0,
                 ),
-                child: const Text("Password"),
+                child: Text("Password"),
               ),
               const SizedBox(height: 5),
               Padding(
@@ -172,14 +172,14 @@ class _LoginpageState extends State<Loginpage> {
                       },
                     ),
                     const Text("Remember me"),
-                    Spacer(),
+                    const Spacer(),
                     TextButton(
                       onPressed: () {
                         // Add forgot password logic here
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ForgotPasswordPage(),
+                            builder: (context) => const ForgotPasswordPage(),
                           ),
                         );
                       },
@@ -205,7 +205,7 @@ class _LoginpageState extends State<Loginpage> {
                     ),
                   ),
                   child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           "Log In",
                           style: TextStyle(
@@ -215,8 +215,8 @@ class _LoginpageState extends State<Loginpage> {
                 ),
               ),
               const SizedBox(height: 20),
-              Row(
-                children: const [
+              const Row(
+                children: [
                   Expanded(
                     child: Divider(
                       thickness: 1,
@@ -293,7 +293,8 @@ class _LoginpageState extends State<Loginpage> {
                         // Navigate to RegisterPage
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SignUpPage()),
+                          MaterialPageRoute(
+                              builder: (context) => const SignUpPage()),
                         );
                       },
                       child: const Text(

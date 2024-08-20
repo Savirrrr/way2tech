@@ -23,8 +23,8 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data
                     android:scheme="http"
-                    android:host="myexample.com"
-                    android:pathPattern="/.."/>
+                    android:host="myexample.com"/>
+                <data android:scheme="https" />
             </intent-filter>
             
             <!-- Specifies an Android theme to apply to this Activity as soon as

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:way2techv1/pages/Login_singup.dart';
+import 'package:way2techv1/pages/account.dart';
 import 'package:way2techv1/pages/confirm_password.dart';
 import 'package:way2techv1/pages/forgot_password.dart';
 import 'package:go_router/go_router.dart';
@@ -54,7 +55,11 @@ class MyApp extends StatelessWidget {
             ),
             GoRoute(
               path: '/loginsignup',
-              builder: (context, state) => const StartPage(),
+              builder: (context, state) => HomePage(),
+            ),
+            GoRoute(
+              path: '/account',
+              builder: (context, state) => AccountPage(),
             ),
             GoRoute(
               path: '/forgotpassword',

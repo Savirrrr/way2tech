@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class Navbar extends StatelessWidget {
   @override
@@ -32,6 +33,7 @@ class Navbar extends StatelessWidget {
               icon: Icon(Icons.person, color: Colors.black),
               onPressed: () {
                 //  profile logic
+                GoRouter.of(context).go('/account');
               },
             ),
           ],

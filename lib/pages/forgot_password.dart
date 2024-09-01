@@ -1,7 +1,7 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:way2techv1/pages/otp.dart'; // Make sure to update the import path as per your project structure
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -12,9 +12,15 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
+  bool isLoading = false; // To manage loading state
 
   Future<void> _forgotpwd() async {
     String email = _emailController.text;
+
+    setState(() {
+      isLoading = true;
+    });
+
     final response = await http.post(
       Uri.parse('http://192.168.80.119:3000/forgotpwd'),
       headers: {
@@ -22,14 +28,23 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       },
       body: jsonEncode({'email': email}),
     );
+
+    setState(() {
+      isLoading = false;
+    });
+
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email sent succesfully!')),
+        const SnackBar(content: Text('OTP sent to email!')),
       );
-    }
-    if (response.statusCode != 200) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => OTPVerificationPage(email: email)),
+      );
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid email ')),
+        const SnackBar(content: Text('Invalid email')),
       );
     }
   }
@@ -37,89 +52,65 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
+      appBar: AppBar(
+        title: const Text('Forgot Password'),
+        centerTitle: true,
+      ),
+      body: Padding(
         padding: const EdgeInsets.all(20),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // const SizedBox(height: 40),
-              const Center(
-                child: Text(
-                  "Forgot Password",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            const Text(
+              "Enter the email associated with your account and we’ll send an email with a code to reset your password.",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 30),
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                hintText: 'Enter your email',
+                hintStyle: const TextStyle(color: Colors.black54),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide.none,
                 ),
               ),
-              const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.only(
-                  left: 10.0,
-                  right: 10.0,
-                  bottom: 6.0,
-                ),
-                child: Text(
-                  "Enter the email associated with your account and we’ll send an email with code to reset your password",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                onPressed: isLoading ? null : _forgotpwd,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 15,
+                    horizontal: 120,
+                  ),
+                  backgroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
+                child: isLoading
+                    ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                    : const Text(
+                        "Confirm",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
               ),
-              const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.only(
-                  left: 15.0,
-                  bottom: 4.0,
-                ),
-                child: Text("Email"),
-              ),
-              const SizedBox(height: 5),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 10.0,
-                  bottom: 4.0,
-                ),
-                child: TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Text your email',
-                    hintStyle: const TextStyle(color: Colors.black54),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _forgotpwd,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 120,
-                    ),
-                    backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  child: const Text(
-                    "Confirm",
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

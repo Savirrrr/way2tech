@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:way2techv1/pages/Login_singup.dart';
 import 'package:way2techv1/pages/account.dart';
 import 'package:way2techv1/pages/confirm_password.dart';
 import 'package:way2techv1/pages/forgot_password.dart';
-import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/onboarding_screen.dart';
 import 'pages/home.dart';
 import 'pages/login_page.dart';
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       await prefs.setBool('isFirstRun', false);
       return '/onboarding';
     } else {
-      return '/loginsignup'; // Redirect to home if it's not the first run
+      return '/loginsignup'; // Redirect to login/signup if it's not the first run
     }
   }
 
@@ -34,9 +34,16 @@ class MyApp extends StatelessWidget {
       future: _getInitialRoute(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator(); // Show a loading indicator while checking initial route
+          return const MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          );
         }
 
+        // Initialize GoRouter outside of the FutureBuilder to avoid reinitialization
         final GoRouter router = GoRouter(
           initialLocation: snapshot.data ?? '/',
           routes: [
@@ -55,7 +62,7 @@ class MyApp extends StatelessWidget {
             ),
             GoRoute(
               path: '/loginsignup',
-              builder: (context, state) => HomePage(),
+              builder: (context, state) => const StartPage(),
             ),
             GoRoute(
               path: '/account',
@@ -69,7 +76,9 @@ class MyApp extends StatelessWidget {
               path: '/resetpassword',
               builder: (context, state) {
                 final token = state.uri.queryParameters['token'] ?? '';
-                return ConfirmPasswordPage(token: token);
+                return ConfirmPasswordPage(
+                  email: '', // You need to pass the email parameter here
+                );
               },
             ),
             GoRoute(

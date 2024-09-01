@@ -60,7 +60,7 @@ class StartPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const SignUpPage()),
+                    MaterialPageRoute(builder: (context) => SignUpPage()),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -160,8 +160,7 @@ class StartPage extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => const SignUpPage()),
+                        MaterialPageRoute(builder: (context) => SignUpPage()),
                       );
                     },
                     child: const Text(

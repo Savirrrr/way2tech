@@ -2,103 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-// class ConfirmPasswordPage extends StatefulWidget {
-//   final String token;
-
-//   const ConfirmPasswordPage({Key? key, required this.token}) : super(key: key);
-
-//   @override
-//   _ConfirmPasswordPageState createState() => _ConfirmPasswordPageState();
-// }
-
-// class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
-//   final TextEditingController _passwordController = TextEditingController();
-//   final TextEditingController _confirmPasswordController =
-//       TextEditingController();
-
-//   Future<void> _resetPassword() async {
-//     if (_passwordController.text != _confirmPasswordController.text) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         const SnackBar(content: Text('Passwords do not match')),
-//       );
-//       return;
-//     }
-
-//     final response = await http.post(
-//       Uri.parse('http://localhost:3000/resetpassword'),
-//       headers: <String, String>{
-//         'Content-Type': 'application/json; charset=UTF-8',
-//       },
-//       body: jsonEncode(<String, String>{
-//         'token': widget.token,
-//         'password': _passwordController.text,
-//       }),
-//     );
-
-//     if (response.statusCode == 200) {
-//       Navigator.pushReplacementNamed(context, '/login');
-//     } else {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         const SnackBar(content: Text('Error resetting password')),
-//       );
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Reset Password'),
-//       ),
-//       body: SafeArea(
-//         child: Padding(
-//           padding: const EdgeInsets.all(16.0),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               const Text(
-//                 "Reset Password",
-//                 style: TextStyle(
-//                   fontSize: 24,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//               ),
-//               const SizedBox(height: 16),
-//               TextField(
-//                 controller: _passwordController,
-//                 decoration: const InputDecoration(
-//                   labelText: 'New Password',
-//                   border: OutlineInputBorder(),
-//                 ),
-//                 obscureText: true,
-//               ),
-//               const SizedBox(height: 16),
-//               TextField(
-//                 controller: _confirmPasswordController,
-//                 decoration: const InputDecoration(
-//                   labelText: 'Confirm New Password',
-//                   border: OutlineInputBorder(),
-//                 ),
-//                 obscureText: true,
-//               ),
-//               const SizedBox(height: 24),
-//               Center(
-//                 child: ElevatedButton(
-//                   onPressed: _resetPassword,
-//                   child: const Text("Confirm"),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 class ConfirmPasswordPage extends StatefulWidget {
-  final String token;
+  final String email;
 
-  ConfirmPasswordPage({required this.token});
+  ConfirmPasswordPage({required this.email});
 
   @override
   _ConfirmPasswordPageState createState() => _ConfirmPasswordPageState();
@@ -108,6 +15,8 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  final TextEditingController otpController =
+      TextEditingController(); // Added OTP controller
   bool isLoading = false;
   String? errorMessage;
 
@@ -121,6 +30,10 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
+            TextField(
+              controller: otpController, // Added OTP TextField
+              decoration: const InputDecoration(labelText: 'OTP'),
+            ),
             TextField(
               controller: passwordController,
               obscureText: true,
@@ -153,6 +66,7 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
   }
 
   Future<void> _resetPassword() async {
+    // Removed parameter
     setState(() {
       isLoading = true;
       errorMessage = null;
@@ -160,35 +74,30 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
 
     if (passwordController.text != confirmPasswordController.text) {
       setState(() {
+        errorMessage = "Passwords do not match!";
         isLoading = false;
-        errorMessage = 'Passwords do not match';
       });
       return;
     }
 
     final response = await http.post(
-      Uri.parse(
-          'https://mycsutoscheme/resetpassword'), // Replace with your actual API endpoint
-      headers: <String, String>{
+      Uri.parse('http://192.168.80.119:3000/resetpassword'),
+      headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(<String, String>{
-        'token': widget.token,
+      body: jsonEncode({
+        'email': widget.email,
+        'otp': otpController.text, // Correctly using the otpController
         'newPassword': passwordController.text,
       }),
     );
+
     if (response.statusCode == 200) {
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Password reset successful'),
-      ));
-      Navigator.pop(context); // Navigate back to login or home page
+      Navigator.pushReplacementNamed(context, '/login');
     } else {
       setState(() {
+        errorMessage = 'Invalid OTP or expired link';
         isLoading = false;
-        errorMessage = 'Failed to reset password';
       });
     }
   }

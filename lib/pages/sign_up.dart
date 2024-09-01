@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:password_strength/password_strength.dart';
 import 'package:http/http.dart' as http;
 import 'package:way2techv1/pages/login_page.dart';
+import 'package:way2techv1/pages/otp.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -50,7 +51,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       var response = await http.post(
-        Uri.parse('http://192.168.80.119:3000/signup'),
+        Uri.parse('http://172.20.10.2:3000/signup'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -62,11 +63,16 @@ class _SignUpPageState extends State<SignUpPage> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sign-Up Successful')),
+          const SnackBar(
+              content: Text('Sign-Up Successful. Please verify your email.')),
         );
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => Loginpage()),
+          MaterialPageRoute(
+              builder: (context) => OTPVerificationPage(
+                    email: email,
+                    isRegistration: true,
+                  )),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:way2techv1/pages/forgot_password.dart';
 import 'dart:convert';
-import 'home.dart';
+// import 'home.dart';
 import 'sign_up.dart';
 
 class Loginpage extends StatefulWidget {
@@ -40,11 +42,13 @@ class _LoginpageState extends State<Loginpage> {
     setState(() {
       _isLoading = true;
     });
+
     String email = _emailController.text;
     String password = _passwordController.text;
+
     final response = await http.post(
       Uri.parse(
-          'http://192.168.80.119:3000/login'), // Replace with your backend URL
+          'http://172.20.10.2:3000/login'), // Replace with your backend URL
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -59,16 +63,12 @@ class _LoginpageState extends State<Loginpage> {
     });
 
     if (response.statusCode == 200) {
-      // Login successful, navigate to home page
-      setState(() {
-        _isLoggedIn = true;
-      });
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                const HomePage()), // Replace with your HomePage widget
-      );
+      // Save email in SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userEmail', email);
+
+      // Navigate to home page with email as extra parameter
+      context.go('/home', extra: email);
     } else {
       // Login failed, show error message
       ScaffoldMessenger.of(context).showSnackBar(

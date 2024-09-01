@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:way2techv1/pages/account.dart';
 
 class Navbar extends StatelessWidget {
+  final String email;
+
+  const Navbar({super.key, required this.email});
+
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -32,8 +37,13 @@ class Navbar extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.person, color: Colors.black),
               onPressed: () {
-                //  profile logic
-                GoRouter.of(context).go('/account');
+                // Navigate to AccountPage and pass the email
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AccountPage(email: email),
+                  ),
+                );
               },
             ),
           ],

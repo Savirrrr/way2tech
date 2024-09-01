@@ -19,12 +19,15 @@ class MyApp extends StatelessWidget {
   Future<String> _getInitialRoute() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isFirstRun = prefs.getBool('isFirstRun') ?? true;
+    String? email = prefs.getString('userEmail');
 
     if (isFirstRun) {
       await prefs.setBool('isFirstRun', false);
       return '/onboarding';
+    } else if (email != null && email.isNotEmpty) {
+      return '/home'; // Redirect to home if the user is already logged in
     } else {
-      return '/loginsignup'; // Redirect to login/signup if it's not the first run
+      return '/loginsignup'; // Redirect to login/signup if the user is not logged in
     }
   }
 
@@ -43,18 +46,22 @@ class MyApp extends StatelessWidget {
           );
         }
 
-        // Initialize GoRouter outside of the FutureBuilder to avoid reinitialization
+        final initialRoute = snapshot.data ?? '/';
+
         final GoRouter router = GoRouter(
-          initialLocation: snapshot.data ?? '/',
+          initialLocation: initialRoute,
           routes: [
             GoRoute(
               path: '/',
-              builder: (context, state) =>
-                  const Scaffold(), // Placeholder widget, actual routing logic below
+              builder: (context, state) => const StartPage(),
             ),
             GoRoute(
               path: '/home',
-              builder: (context, state) => const HomePage(),
+              builder: (context, state) {
+                final email = state.extra as String? ??
+                    ''; // Extract the email from the state
+                return HomePage(email: email);
+              },
             ),
             GoRoute(
               path: '/login',
@@ -66,7 +73,11 @@ class MyApp extends StatelessWidget {
             ),
             GoRoute(
               path: '/account',
-              builder: (context, state) => AccountPage(),
+              builder: (context, state) {
+                final email = state.extra as String? ??
+                    ''; // Extract the email from the state
+                return AccountPage(email: email);
+              },
             ),
             GoRoute(
               path: '/forgotpassword',
@@ -75,10 +86,8 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/resetpassword',
               builder: (context, state) {
-                final token = state.uri.queryParameters['token'] ?? '';
-                return ConfirmPasswordPage(
-                  email: '', // You need to pass the email parameter here
-                );
+                final email = state.uri.queryParameters['email'] ?? '';
+                return ConfirmPasswordPage(email: email);
               },
             ),
             GoRoute(
@@ -86,9 +95,13 @@ class MyApp extends StatelessWidget {
               builder: (context, state) => const OnboardingScreen(),
             ),
           ],
-          errorBuilder: (context, state) => Scaffold(
-            body: Center(child: Text(state.error.toString())),
-          ),
+          errorBuilder: (context, state) {
+            return Scaffold(
+              body: Center(
+                child: Text('Error: ${state.error}'),
+              ),
+            );
+          },
         );
 
         return MaterialApp.router(

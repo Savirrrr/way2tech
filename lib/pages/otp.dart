@@ -1,12 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:way2techv1/pages/confirm_password.dart';
+import 'login_page.dart'; // Import the Login page
 
 class OTPVerificationPage extends StatefulWidget {
   final String email;
+  final bool isRegistration; // Pass this parameter to decide redirection
 
-  OTPVerificationPage({required this.email});
+  OTPVerificationPage({required this.email, required this.isRegistration});
 
   @override
   _OTPVerificationPageState createState() => _OTPVerificationPageState();
@@ -16,8 +20,9 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
   late List<TextEditingController> otpControllers;
   late List<FocusNode> focusNodes;
   final int otpLength = 6;
-  late int remainingTime = 60; // Initial countdown time in seconds
-  late bool isResendEnabled = false;
+  int remainingTime = 60; // Initial countdown time in seconds
+  bool isResendEnabled = false;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -35,20 +40,21 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
     for (var focusNode in focusNodes) {
       focusNode.dispose();
     }
+    _timer?.cancel();
     super.dispose();
   }
 
   void startResendTimer() {
-    Future.delayed(Duration(seconds: 1), () {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (remainingTime > 0) {
         setState(() {
           remainingTime--;
         });
-        startResendTimer();
       } else {
         setState(() {
           isResendEnabled = true;
         });
+        timer.cancel();
       }
     });
   }
@@ -64,7 +70,9 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.80.119:3000/verifyotp'),
+        Uri.parse(widget.isRegistration
+            ? 'http://172.20.10.2:3000/verifySignupOtp'
+            : 'http://172.20.10.2:3000/verifyForgotPasswordOtp'),
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode({'email': widget.email, 'otp': otp}),
       );
@@ -73,8 +81,20 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('OTP verified successfully!')),
         );
-        Navigator.pushNamed(context, '/resetpassword',
-            arguments: {'email': widget.email});
+
+        // Conditional Navigation based on the context
+        if (widget.isRegistration) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Loginpage()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ConfirmPasswordPage(email: widget.email)),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Invalid or expired OTP')),
@@ -97,12 +117,18 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
       setState(() {
         remainingTime = 60;
         isResendEnabled = false;
+        _timer?.cancel();
+        startResendTimer();
       });
-      startResendTimer();
+
+      // Clear OTP inputs
+      for (var controller in otpControllers) {
+        controller.clear();
+      }
 
       try {
         final response = await http.post(
-          Uri.parse('http://192.168.80.119:3000/forgotpwd'),
+          Uri.parse('http://172.20.10.2:3000/forgotpwd'),
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
           body: jsonEncode({'email': widget.email}),
         );
@@ -143,7 +169,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Enter your OTP which has been sent to your email and completely verify your account.',
+              'Enter the OTP sent to your email to verify your account.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16),
             ),
@@ -169,6 +195,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
                         FocusScope.of(context)
                             .requestFocus(focusNodes[index - 1]);
                       }
+                      setState(() {});
                     },
                     decoration: InputDecoration(
                       counterText: '',
@@ -197,7 +224,10 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
             ),
             SizedBox(height: 40),
             ElevatedButton(
-              onPressed: onConfirmPressed,
+              onPressed:
+                  otpControllers.any((controller) => controller.text.isEmpty)
+                      ? null
+                      : onConfirmPressed,
               child: Text('Confirm'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,

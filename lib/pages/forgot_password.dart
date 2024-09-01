@@ -22,7 +22,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     });
 
     final response = await http.post(
-      Uri.parse('http://192.168.80.119:3000/forgotpwd'),
+      Uri.parse('http://172.20.10.2:3000/forgotpwd'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -40,7 +40,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => OTPVerificationPage(email: email)),
+            builder: (context) => OTPVerificationPage(
+                  email: email,
+                  isRegistration: false,
+                )),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

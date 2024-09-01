@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const client = new MongoClient("mongodb+srv://peecharasavir:DLv37jsi391FY9MR@cluster0.jv90ftt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
+const client = new MongoClient("mongodb+srv://peecharasavir:DLv37jsi391FY9MR@cluster0.jv90ftt.mongodb.net/?retryWrites=true&w=majority");
 
 let collection;
 let otpCollection;
@@ -18,7 +18,7 @@ async function connectDB() {
     try {
         await client.connect();
         collection = client.db("user_info").collection("users");
-        otpCollection = client.db("user_info").collection("otps");
+        otpCollection = client.db("user_info").collection("otp_tokens");
         console.log("Connected to MongoDB!");
     } catch (err) {
         console.error(err);
@@ -26,68 +26,94 @@ async function connectDB() {
     }
 }
 
+// Store user details temporarily with OTP
 app.post('/signup', async (req, res) => {
-    if (req.method === 'POST') {
-        const user = req.body;
-        user.email = user.email.toLowerCase();
+    const user = req.body;
+    user.email = user.email.toLowerCase();
 
-        try {
-            const hashedPassword = await bcrypt.hash(user.password, 10);
-            user.password = hashedPassword;
+    try {
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(user.password, 10);
 
-            await collection.insertOne(user);
-            console.log(`User signed up successfully: ${user.email}`);
-            res.status(200).send('User signed up successfully');
-        } catch (err) {
-            console.error(`Error inserting user into database: ${err}`);
-            res.status(500).send(err.message);
+        // Delete any existing OTPs for this email
+        await otpCollection.deleteMany({ email: user.email });
+
+        // Generate OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const expirationTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        // Log the OTP and expiration time
+        console.log(`Generated OTP: ${otp}, Expiration Time: ${expirationTime}`);
+
+        // Insert the user details and OTP into a temporary collection
+        const insertResult = await otpCollection.insertOne({
+            email: user.email,
+            password: hashedPassword, // Store the hashed password temporarily
+            otp,
+            expires_at: expirationTime,
+            verified: false // Initially set to false
+        });
+
+        // Log the insertion result
+        console.log(`OTP Insertion Result: ${JSON.stringify(insertResult)}`);
+
+        if (insertResult.insertedCount === 0) {
+            console.error('Failed to insert OTP into the database');
+            res.status(500).send('Failed to generate OTP. Please try again.');
+            return;
         }
-    } else {
-        console.log(`Invalid request method: ${req.method}`);
-        res.status(405).send('Invalid request method');
+
+        // Send OTP via email
+        const emailBody = `Your OTP code is: ${otp}`;
+        await sendEmail(user.email, 'Account Verification OTP', emailBody);
+        console.log(`OTP sent to: ${user.email}`);
+
+        res.status(200).send('User signed up successfully. Please verify your email.');
+    } catch (err) {
+        console.error(`Error during signup: ${err}`);
+        res.status(500).send('Internal server error');
     }
 });
 
-app.post('/login', async (req, res) => {
-    if (req.method === 'POST') {
-        const user = req.body;
-        user.email = user.email.toLowerCase();
 
-        console.log(`Logging in with email: ${user.email}`);
+// Verify OTP and move user details to the main collection
+app.post('/verifySignupOtp', async (req, res) => {
+    const { email, otp } = req.body;
 
-        try {
-            const storedUser = await collection.findOne({ email: user.email });
+    try {
+        const emailLower = email.toLowerCase();
 
-            if (!storedUser) {
-                console.log(`User not found in database: ${user.email}`);
-                res.status(401).send('User not found');
-                return;
-            }
+        // Find the OTP record
+        const otpRecord = await otpCollection.findOne({ email: emailLower, otp });
 
-            console.log(`User found: ${storedUser.email}`);
-
-            const isMatch = await bcrypt.compare(user.password, storedUser.password);
-            if (!isMatch) {
-                console.log(`Invalid password for user: ${user.email}`);
-                res.status(401).send('Invalid password');
-                return;
-            }
-
-            console.log(`User logged in successfully: ${user.email}`);
-            res.status(200).send('User logged in successfully');
-        } catch (err) {
-            console.error(`Error finding user in database: ${err}`);
-            res.status(500).send(err.message);
+        if (!otpRecord) {
+            console.log('OTP record not found or mismatch');
+            res.status(401).send('Invalid or expired OTP');
+            return;
         }
-    } else {
-        console.log(`Invalid request method: ${req.method}`);
-        res.status(405).send('Invalid request method');
+
+        if (new Date() > otpRecord.expires_at) {
+            console.log('OTP expired');
+            res.status(401).send('Invalid or expired OTP');
+            return;
+        }
+
+        // OTP is valid, insert into the main users collection
+        await collection.insertOne({
+            email: otpRecord.email,
+            password: otpRecord.password // Hashed password
+        });
+
+        // Mark the OTP record as verified (optional) or delete it
+        await otpCollection.deleteOne({ email: emailLower, otp });
+
+        console.log(`User verified and added to database: ${emailLower}`);
+        res.status(200).send('User verified and added to database');
+    } catch (err) {
+        console.error(`Error verifying OTP: ${err}`);
+        res.status(500).send('Internal server error');
     }
 });
-
-function generateToken() {
-    return crypto.randomBytes(32).toString('hex');
-}
 
 async function sendEmail(to, subject, body) {
     const from = 'mailer.learnx@gmail.com';
@@ -116,6 +142,39 @@ async function sendEmail(to, subject, body) {
     }
 }
 
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    const emailLower = email.toLowerCase(); // Ensure email is in lowercase
+
+    console.log(`Login attempt with email: ${emailLower}`);
+
+    try {
+        // Retrieve the user from the database
+        const storedUser = await collection.findOne({ email: emailLower });
+
+        if (!storedUser) {
+            console.log(`User not found for email: ${emailLower}`);
+            res.status(401).send('Incorrect username/password');
+            return;
+        }
+
+        console.log(`User found: ${storedUser.email}`);
+
+        // Compare the provided password with the stored hashed password
+        const isMatch = await bcrypt.compare(password, storedUser.password);
+        if (!isMatch) {
+            console.log(`Incorrect password for user: ${emailLower}`);
+            res.status(401).send('Incorrect username/password');
+            return;
+        }
+
+        console.log(`User logged in successfully: ${emailLower}`);
+        res.status(200).send('User logged in successfully');
+    } catch (err) {
+        console.error(`Error during login: ${err}`);
+        res.status(500).send('Internal server error');
+    }
+});
 app.post('/forgotpwd', async (req, res) => {
     const { email } = req.body;
 
@@ -160,28 +219,60 @@ app.post('/verifyotp', async (req, res) => {
 });
 
 app.post('/resetpassword', async (req, res) => {
-    const { email, otp, newPassword } = req.body;
+    const { email, newPassword } = req.body;
+    const emailLower = email.toLowerCase();
 
     try {
-        const otpRecord = await otpCollection.findOne({ email: email.toLowerCase(), otp });
-
-        if (!otpRecord || new Date() > otpRecord.expires_at) {
-            res.status(401).send('Invalid or expired OTP');
-            return;
-        }
-
+        // Hash the new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await collection.updateOne({ email: email.toLowerCase() }, { $set: { password: hashedPassword } });
 
-        await otpCollection.deleteOne({ email: email.toLowerCase(), otp });
+        // Update the user's password in the database
+        const result = await collection.updateOne(
+            { email: emailLower },
+            { $set: { password: hashedPassword } }
+        );
 
-        console.log(`Password updated for user: ${email}`);
-        res.status(200).send('Password updated successfully');
+        if (result.modifiedCount === 1) {
+            res.status(200).send('Password updated successfully');
+        } else {
+            res.status(400).send('Failed to update password');
+        }
     } catch (err) {
         console.error(`Error resetting password: ${err}`);
         res.status(500).send('Internal server error');
     }
 });
+
+app.post('/verifyForgotPasswordOtp', async (req, res) => {
+    const { email, otp } = req.body;
+    const emailLower = email.toLowerCase(); // Ensure consistent email case
+
+    try {
+        const otpRecord = await otpCollection.findOne({ email: emailLower, otp });
+
+        // Debugging logs
+        console.log(`OTP record: ${JSON.stringify(otpRecord)}`);
+        console.log(`Current Time: ${new Date()}`);
+        console.log(`OTP Expiration Time: ${otpRecord ? otpRecord.expires_at : 'No OTP Record Found'}`);
+
+        if (!otpRecord) {
+            console.log('OTP record not found or mismatch');
+            return res.status(401).send('Invalid or expired OTP');
+        }
+
+        if (new Date() > otpRecord.expires_at) {
+            console.log('OTP expired');
+            return res.status(401).send('Invalid or expired OTP');
+        }
+
+        // OTP is valid, allow user to reset their password
+        res.status(200).send('OTP verified, proceed to change password');
+    } catch (err) {
+        console.error(`Error verifying OTP: ${err}`);
+        res.status(500).send('Internal server error');
+    }
+});
+
 
 async function startServer() {
     await connectDB();

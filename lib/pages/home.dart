@@ -3,7 +3,9 @@ import 'package:way2techv1/pages/app_bar.dart';
 import 'package:way2techv1/pages/nav_bar.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final String email;
+
+  const HomePage({super.key, required this.email});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +14,7 @@ class HomePage extends StatelessWidget {
       body: const Card(
         color: Colors.white,
       ),
-      bottomNavigationBar: Navbar(),
+      bottomNavigationBar: Navbar(email: email), // Pass email to Navbar
     );
   }
 }

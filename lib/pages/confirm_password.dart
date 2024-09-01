@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:way2techv1/main.dart';
 
 class ConfirmPasswordPage extends StatefulWidget {
   final String email;
@@ -15,8 +17,6 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
-  final TextEditingController otpController =
-      TextEditingController(); // Added OTP controller
   bool isLoading = false;
   String? errorMessage;
 
@@ -24,25 +24,34 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Confirm Password'),
+        title: const Text('Reset Password'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            TextField(
-              controller: otpController, // Added OTP TextField
-              decoration: const InputDecoration(labelText: 'OTP'),
+            const Text(
+              'Enter your new password below:',
+              style: TextStyle(fontSize: 18),
             ),
+            const SizedBox(height: 20),
             TextField(
               controller: passwordController,
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'New Password'),
+              decoration: const InputDecoration(
+                labelText: 'New Password',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const SizedBox(height: 20),
             TextField(
               controller: confirmPasswordController,
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'Confirm Password'),
+              decoration: const InputDecoration(
+                labelText: 'Confirm Password',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 20),
             if (errorMessage != null)
@@ -51,13 +60,24 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
                 style: const TextStyle(color: Colors.red),
               ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isLoading ? null : _resetPassword,
-              child: isLoading
-                  ? const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    )
-                  : const Text('Reset Password'),
+            Center(
+              child: ElevatedButton(
+                onPressed: isLoading ? null : _resetPassword,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 15,
+                    horizontal: 80,
+                  ),
+                ),
+                child: isLoading
+                    ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                    : const Text(
+                        'Reset Password',
+                        style: TextStyle(fontSize: 16),
+                      ),
+              ),
             ),
           ],
         ),
@@ -66,7 +86,6 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
   }
 
   Future<void> _resetPassword() async {
-    // Removed parameter
     setState(() {
       isLoading = true;
       errorMessage = null;
@@ -80,23 +99,37 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
       return;
     }
 
-    final response = await http.post(
-      Uri.parse('http://192.168.80.119:3000/resetpassword'),
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({
-        'email': widget.email,
-        'otp': otpController.text, // Correctly using the otpController
-        'newPassword': passwordController.text,
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('http://172.20.10.2:3000/resetpassword'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({
+          'email': widget.email,
+          'newPassword': passwordController.text,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      Navigator.pushReplacementNamed(context, '/login');
-    } else {
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password updated successfully!'),
+          ),
+        );
+
+        // Navigate to login page after showing the snackbar
+        // Navigator.pushReplacementNamed(context, '/login');
+        context.go('/login');
+      } else {
+        setState(() {
+          errorMessage = 'Failed to reset password. Please try again.';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
       setState(() {
-        errorMessage = 'Invalid OTP or expired link';
+        errorMessage = 'An error occurred: $e';
         isLoading = false;
       });
     }

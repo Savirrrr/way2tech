@@ -2,8 +2,10 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
+const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
@@ -13,12 +15,14 @@ const client = new MongoClient("mongodb+srv://peecharasavir:DLv37jsi391FY9MR@clu
 
 let collection;
 let otpCollection;
+let dataCollection;
 
 async function connectDB() {
     try {
         await client.connect();
         collection = client.db("user_info").collection("users");
         otpCollection = client.db("user_info").collection("otp_tokens");
+        dataCollection=client.db("user_info").collection("data");
         console.log("Connected to MongoDB!");
     } catch (err) {
         console.error(err);
@@ -26,35 +30,75 @@ async function connectDB() {
     }
 }
 
+// Serve the upload page
+// app.get("/", (req, res) => {
+//     res.render("upload.ejs");
+// });
+
+// Set up multer for file uploads
+const storage = multer.memoryStorage(); 
+const upload = multer({ storage: storage });
+
+// Handle file uploads
+app.post('/upload', upload.single('media'), async (req, res) => {
+    console.log(req.body);
+    const { title, caption, userId } = req.body; // Adjusted to match the input names in `upload.dart`
+    let mediaData;
+    let mediaContentType;
+
+    if (req.file) {
+        mediaData = req.file.buffer;
+        mediaContentType = req.file.mimetype;
+    } else {
+        // Optional: Use a default image if no file is uploaded
+        mediaData = fs.readFileSync('path/to/default.jpg'); 
+        mediaContentType = 'image/jpeg'; 
+    }
+
+    const dataToSave = {
+        userId: new ObjectId(userId), // Ensure that userId is provided correctly in `upload.dart`
+        title: title, // Save title from the `upload.dart` form
+        caption: caption, // Save caption from the `upload.dart` form
+        media: {
+            data: mediaData,
+            contentType: mediaContentType,
+        },
+        uploadedAt: new Date(),
+    };
+
+    try {
+        await dataCollection.insertOne(dataToSave);
+        console.log(`Data uploaded successfully with userId: ${userId}`);
+        res.status(200).send('Data uploaded successfully');
+    } catch (err) {
+        console.error(`Error saving data to database: ${err}`);
+        res.status(500).send('Internal server error');
+    }
+});
+
 // Store user details temporarily with OTP
 app.post('/signup', async (req, res) => {
     const user = req.body;
     user.email = user.email.toLowerCase();
 
     try {
-        // Hash the password
         const hashedPassword = await bcrypt.hash(user.password, 10);
 
-        // Delete any existing OTPs for this email
         await otpCollection.deleteMany({ email: user.email });
 
-        // Generate OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const expirationTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        const expirationTime = new Date(Date.now() + 10 * 60 * 1000);
 
-        // Log the OTP and expiration time
         console.log(`Generated OTP: ${otp}, Expiration Time: ${expirationTime}`);
 
-        // Insert the user details and OTP into a temporary collection
         const insertResult = await otpCollection.insertOne({
             email: user.email,
-            password: hashedPassword, // Store the hashed password temporarily
+            password: hashedPassword,
             otp,
             expires_at: expirationTime,
-            verified: false // Initially set to false
+            verified: false 
         });
 
-        // Log the insertion result
         console.log(`OTP Insertion Result: ${JSON.stringify(insertResult)}`);
 
         if (insertResult.insertedCount === 0) {
@@ -63,7 +107,6 @@ app.post('/signup', async (req, res) => {
             return;
         }
 
-        // Send OTP via email
         const emailBody = `Your OTP code is: ${otp}`;
         await sendEmail(user.email, 'Account Verification OTP', emailBody);
         console.log(`OTP sent to: ${user.email}`);
@@ -75,15 +118,12 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-
 // Verify OTP and move user details to the main collection
 app.post('/verifySignupOtp', async (req, res) => {
     const { email, otp } = req.body;
 
     try {
         const emailLower = email.toLowerCase();
-
-        // Find the OTP record
         const otpRecord = await otpCollection.findOne({ email: emailLower, otp });
 
         if (!otpRecord) {
@@ -98,13 +138,11 @@ app.post('/verifySignupOtp', async (req, res) => {
             return;
         }
 
-        // OTP is valid, insert into the main users collection
         await collection.insertOne({
             email: otpRecord.email,
-            password: otpRecord.password // Hashed password
+            password: otpRecord.password
         });
 
-        // Mark the OTP record as verified (optional) or delete it
         await otpCollection.deleteOne({ email: emailLower, otp });
 
         console.log(`User verified and added to database: ${emailLower}`);
@@ -142,14 +180,14 @@ async function sendEmail(to, subject, body) {
     }
 }
 
+// Handle login
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    const emailLower = email.toLowerCase(); // Ensure email is in lowercase
+    const emailLower = email.toLowerCase();
 
     console.log(`Login attempt with email: ${emailLower}`);
 
     try {
-        // Retrieve the user from the database
         const storedUser = await collection.findOne({ email: emailLower });
 
         if (!storedUser) {
@@ -160,7 +198,6 @@ app.post('/login', async (req, res) => {
 
         console.log(`User found: ${storedUser.email}`);
 
-        // Compare the provided password with the stored hashed password
         const isMatch = await bcrypt.compare(password, storedUser.password);
         if (!isMatch) {
             console.log(`Incorrect password for user: ${emailLower}`);
@@ -175,16 +212,16 @@ app.post('/login', async (req, res) => {
         res.status(500).send('Internal server error');
     }
 });
+
+// Handle forgot password
 app.post('/forgotpwd', async (req, res) => {
     const { email } = req.body;
 
     try {
-        // Delete any existing OTP for this email
         await otpCollection.deleteMany({ email: email.toLowerCase() });
 
-        // Generate a new OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const expirationTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        const expirationTime = new Date(Date.now() + 10 * 60 * 1000);
 
         await otpCollection.insertOne({ email: email.toLowerCase(), otp, expires_at: expirationTime });
 
@@ -200,6 +237,7 @@ app.post('/forgotpwd', async (req, res) => {
     }
 });
 
+// Verify OTP for forgot password
 app.post('/verifyotp', async (req, res) => {
     const { email, otp } = req.body;
 
@@ -218,15 +256,14 @@ app.post('/verifyotp', async (req, res) => {
     }
 });
 
+// Reset password after verifying OTP
 app.post('/resetpassword', async (req, res) => {
     const { email, newPassword } = req.body;
     const emailLower = email.toLowerCase();
 
     try {
-        // Hash the new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // Update the user's password in the database
         const result = await collection.updateOne(
             { email: emailLower },
             { $set: { password: hashedPassword } }
@@ -243,14 +280,14 @@ app.post('/resetpassword', async (req, res) => {
     }
 });
 
+// Verify OTP for password reset
 app.post('/verifyForgotPasswordOtp', async (req, res) => {
     const { email, otp } = req.body;
-    const emailLower = email.toLowerCase(); // Ensure consistent email case
+    const emailLower = email.toLowerCase();
 
     try {
         const otpRecord = await otpCollection.findOne({ email: emailLower, otp });
 
-        // Debugging logs
         console.log(`OTP record: ${JSON.stringify(otpRecord)}`);
         console.log(`Current Time: ${new Date()}`);
         console.log(`OTP Expiration Time: ${otpRecord ? otpRecord.expires_at : 'No OTP Record Found'}`);
@@ -265,7 +302,6 @@ app.post('/verifyForgotPasswordOtp', async (req, res) => {
             return res.status(401).send('Invalid or expired OTP');
         }
 
-        // OTP is valid, allow user to reset their password
         res.status(200).send('OTP verified, proceed to change password');
     } catch (err) {
         console.error(`Error verifying OTP: ${err}`);
@@ -273,7 +309,7 @@ app.post('/verifyForgotPasswordOtp', async (req, res) => {
     }
 });
 
-
+// Start the server
 async function startServer() {
     await connectDB();
 

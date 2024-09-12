@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Display</title>
+</head>
+<body>
+    <h1>Media Document Details</h1>
+    <ul>
+        <% for (const doc of documents) { %>
+            <li>
+                <strong>ID:</strong> <%= doc._id %><br>
+                <strong>User ID:</strong> <%= doc.userId %><br>
+                <strong>Text:</strong> <%= doc.text %><br>
+                <% if (doc.media.contentType.startsWith('image/')) { %>
+                   <strong></strong><br>
+                    <img src="data:<%= doc.media.contentType %>;base64,<%= doc.media.data.toString('base64') %>" alt="Image" style="max-width: 400px;"/>
+                <% } else if (doc.media.contentType.startsWith('video/')) { %>
+                    <strong></strong><br>
+                    <video controls style="max-width: 400px;">
+                        <source src="data:<%= doc.media.contentType %>;base64,<%= doc.media.data.toString('base64') %>" type="<%= doc.media.contentType %>">
+                        Your browser does not support the video tag.
+                    </video>
+                <% } %>
+                <br>
+                <strong>Uploaded At:</strong> <%= new Date(doc.uploadedAt).toLocaleString() %><br>
+            </li>
+            <hr>
+        <% } %>
+    </ul>
+</body>
+</html>

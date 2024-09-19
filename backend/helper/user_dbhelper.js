@@ -154,6 +154,24 @@ app.post('/edit/:tempId', async (req, res) => {
     }
 });
 
+app.get('/check-username/:username', async (req,res)=>{
+    try
+    {
+    const userName=req.params;
+    const user=await collection.findOne({username:userName});
+    if (user) {
+        // If the user exists, send a response indicating the username is taken
+        return res.status(200).json({ isTaken: true });
+      } else {
+        // If the user does not exist, send a response indicating the username is available
+        return res.status(200).json({ isTaken: false });
+      }
+    } catch (error) {
+      console.error('Error checking username:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Store user details temporarily with OTP
 app.post('/signup', async (req, res) => {
     const user = req.body;
@@ -170,21 +188,26 @@ app.post('/signup', async (req, res) => {
         console.log(`Generated OTP: ${otp}, Expiration Time: ${expirationTime}`);
 
         const insertResult = await otpCollection.insertOne({
+            fname:user.firstName,
+            lname:user.lastName,
+            username:user.userName,
             email: user.email,
             password: hashedPassword,
-            username:user.userName,
             otp,
             expires_at: expirationTime,
             verified: false 
-        });
+        },{writeConsern:{w:"majority"} });
 
         console.log(`OTP Insertion Result: ${JSON.stringify(insertResult)}`);
+        const insertedOtp = await otpCollection.findOne({ _id: insertResult.insertedId });
 
-        if (insertResult.insertedCount === 0) {
-            console.error('Failed to insert OTP into the database');
-            res.status(500).send('Failed to generate OTP. Please try again.');
-            return;
-        }
+        console.log('Inserted OTP Document:', insertedOtp);
+
+        // if (insertResult.insertedCount === 0) {
+        //     console.error('Failed to insert OTP into the database');
+        //     res.status(500).send('Failed to generate OTP. Please try again.');
+        //     return;
+        // }
 
         const emailBody = `Your OTP code is: ${otp}`;
         await sendEmail(user.email, 'Account Verification OTP', emailBody);
@@ -204,7 +227,14 @@ app.post('/verifySignupOtp', async (req, res) => {
     try {
         const emailLower = email.toLowerCase();
         const otpRecord = await otpCollection.findOne({ email: emailLower, otp });
+        await collection.insertOne({
+            username:otpRecord.username,
+            firstname: otpRecord.fname,
+            lastname: otpRecord.lname,
+            email: otpRecord.email,
+            password: otpRecord.password
 
+        });
         if (!otpRecord) {
             console.log('OTP record not found or mismatch');
             res.status(401).send('Invalid or expired OTP');
@@ -217,10 +247,7 @@ app.post('/verifySignupOtp', async (req, res) => {
             return;
         }
 
-        await collection.insertOne({
-            email: otpRecord.email,
-            password: otpRecord.password
-        });
+        
 
         await otpCollection.deleteOne({ email: emailLower, otp });
 
@@ -261,37 +288,48 @@ async function sendEmail(to, subject, body) {
 
 // Handle login
 app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    const emailLower = email.toLowerCase();
+    const { emailOrUsername, password } = req.body;
 
-    console.log(`Login attempt with email: ${emailLower}`);
+    // Check if emailOrUsername and password are provided
+    if (!emailOrUsername || !password) {
+        return res.status(400).send('Email/Username and password are required');
+    }
+
+    // Convert emailOrUsername to lowercase
+    const emailOrUsernameLower = emailOrUsername.toLowerCase();
+
+    console.log(`Login attempt with: ${emailOrUsernameLower}`);
 
     try {
-        const storedUser = await collection.findOne({ email: emailLower });
-        const storedUsername = await collection.findOne({ username: emailLower });
+        // Search for the user by either email or username
+        const storedUser = await collection.findOne({
+            $or: [
+                { email: emailOrUsernameLower },
+                { username: emailOrUsernameLower }
+            ]
+        });
 
-        if (!storedUser && !storedUsername) {
-            console.log(`User not found for email: ${emailLower}`);
-            res.status(401).send('Incorrect username/password');
-            return;
+        if (!storedUser) {
+            console.log(`User not found for: ${emailOrUsernameLower}`);
+            return res.status(401).send('Incorrect username/email or password');
         }
 
-        console.log(`User found: ${storedUser.email} and ${storedUsername.username}`);
+        console.log(`User found: ${storedUser.email}`);
 
         const isMatch = await bcrypt.compare(password, storedUser.password);
         if (!isMatch) {
-            console.log(`Incorrect password for user: ${emailLower}`);
-            res.status(401).send('Incorrect username/password');
-            return;
+            console.log(`Incorrect password for user: ${emailOrUsernameLower}`);
+            return res.status(401).send('Incorrect username/email or password');
         }
 
-        console.log(`User logged in successfully: ${emailLower}`);
-        res.status(200).send('User logged in successfully');
+        console.log(`User logged in successfully: ${emailOrUsernameLower}`);
+        return res.status(200).send('User logged in successfully');
     } catch (err) {
         console.error(`Error during login: ${err}`);
-        res.status(500).send('Internal server error');
+        return res.status(500).send('Internal server error');
     }
 });
+
 
 // Handle forgot password
 app.post('/forgotpwd', async (req, res) => {

@@ -234,6 +234,7 @@ app.post('/verifySignupOtp', async (req, res) => {
             email: otpRecord.email,
             password: otpRecord.password
 
+            
         });
         if (!otpRecord) {
             console.log('OTP record not found or mismatch');

@@ -1,4 +1,4 @@
-# way2techv1
+# way2tech  v1.0
 
 A new Flutter project.
 

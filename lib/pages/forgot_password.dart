@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:way2techv1/pages/otp.dart'; // Make sure to update the import path as per your project structure
+import 'package:way2techv1/pages/otp.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -22,7 +22,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     });
 
     final response = await http.post(
-      Uri.parse('http://172.20.10.2:3000/forgotpwd'),
+      Uri.parse('http://192.168.31.154:3000/forgotpwd'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },

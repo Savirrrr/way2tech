@@ -48,7 +48,7 @@ class _LoginpageState extends State<Loginpage> {
 
     final response = await http.post(
       Uri.parse(
-          'http://172.20.10.2:3000/login'), // Replace with your backend URL
+          'http://192.168.31.154:3000/login'), // Replace with your backend URL
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -252,7 +252,10 @@ class _LoginpageState extends State<Loginpage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 50,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                           side: const BorderSide(color: Colors.black12),
@@ -272,7 +275,10 @@ class _LoginpageState extends State<Loginpage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 47,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                           side: const BorderSide(color: Colors.black12),

@@ -51,7 +51,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       var response = await http.post(
-        Uri.parse('http://172.20.10.2:3000/signup'),
+        Uri.parse('http://192.168.31.154:3000/signup'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -257,7 +257,10 @@ class _SignUpPageState extends State<SignUpPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 50,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                           side: const BorderSide(color: Colors.black12),
@@ -277,7 +280,10 @@ class _SignUpPageState extends State<SignUpPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 47,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                           side: const BorderSide(color: Colors.black12),

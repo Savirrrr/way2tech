@@ -39,7 +39,7 @@ class StartPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     vertical: 15,
-                    horizontal: 100,
+                    horizontal: 103,
                   ),
                   backgroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
@@ -118,9 +118,13 @@ class StartPage extends StatelessWidget {
                     ),
                     label: const Text("Continue with Google"),
                     style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: 50,
+                      ),
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      // padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                         side: const BorderSide(color: Colors.black12),
@@ -138,9 +142,13 @@ class StartPage extends StatelessWidget {
                     ),
                     label: const Text("Continue with LinkedIn"),
                     style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: 47,
+                      ),
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      // padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                         side: const BorderSide(color: Colors.black12),

@@ -8,6 +8,7 @@ const multer = require('multer');
 const fs = require('fs');
 
 const app = express();
+app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(cors());
 
@@ -16,6 +17,8 @@ const client = new MongoClient("mongodb+srv://peecharasavir:DLv37jsi391FY9MR@clu
 let collection;
 let otpCollection;
 let dataCollection;
+let eventCollection;
+let tempUploads = {}; 
 
 async function connectDB() {
     try {
@@ -23,6 +26,7 @@ async function connectDB() {
         collection = client.db("user_info").collection("users");
         otpCollection = client.db("user_info").collection("otp_tokens");
         dataCollection=client.db("user_info").collection("data");
+        eventCollection=client.db("users_info").collection("events")
         console.log("Connected to MongoDB!");
     } catch (err) {
         console.error(err);
@@ -42,37 +46,111 @@ const upload = multer({ storage: storage });
 // Handle file uploads
 app.post('/upload', upload.single('media'), async (req, res) => {
     console.log(req.body);
-    const { title, caption, userId } = req.body; // Adjusted to match the input names in `upload.dart`
+    const { title, caption , email} = req.body; // Adjusted to match the input names in `upload.dart`
     let mediaData;
     let mediaContentType;
+    let mediaOriginalName;
 
     if (req.file) {
         mediaData = req.file.buffer;
         mediaContentType = req.file.mimetype;
+        mediaOriginalName=req.file.originalname;
     } else {
         // Optional: Use a default image if no file is uploaded
         mediaData = fs.readFileSync('path/to/default.jpg'); 
         mediaContentType = 'image/jpeg'; 
+        mediaOriginalName='default.jpg';
     }
 
-    const dataToSave = {
-        userId: new ObjectId(userId), // Ensure that userId is provided correctly in `upload.dart`
-        title: title, // Save title from the `upload.dart` form
-        caption: caption, // Save caption from the `upload.dart` form
+    const tempId = new ObjectId(); 
+    tempUploads[tempId] = {
+        userId: new ObjectId(userId),
+        text: text,
         media: {
             data: mediaData,
             contentType: mediaContentType,
+            originalName: mediaOriginalName
         },
         uploadedAt: new Date(),
     };
 
     try {
-        await dataCollection.insertOne(dataToSave);
-        console.log(`Data uploaded successfully with userId: ${userId}`);
-        res.status(200).send('Data uploaded successfully');
+        await sendApprovalEmail(tempId, userId, text, mediaData, mediaContentType, mediaOriginalName, email);
+        res.status(200).send('Email sent for approval');
     } catch (err) {
-        console.error(`Error saving data to database: ${err}`);
-        res.status(500).send('Internal server error');
+        console.error(`Error sending email: ${err}`);
+        res.status(500).send('Error sending email');
+    }
+});
+
+async function sendApprovalEmail(tempId, userId, text, mediaOriginalName, mediaData, mediaContentType) {
+    const editLink = `http://localhost:3000/edit/${tempId}`;
+    const rejectLink = `http://localhost:3000/reject/${tempId}`;
+
+    let mailOptions = {
+        from: 'balasubramanyamchilukala@gmail.com',
+        to: 'baluchilukala900@gmail.com',
+        subject: 'Upload Approval Required',
+        html: `
+            <p>User ID: ${userId}</p>
+            <p>Text: ${text}</p>
+            <p>Please review the upload and approve or reject it:</p>
+            <a href="${editLink}">Accept and Edit</a> | <a href="${rejectLink}">Reject</a>
+        `,
+        attachments: [
+            {
+                filename: mediaOriginalName,
+                content: mediaData,
+                contentType: mediaContentType
+            }
+        ]
+    };
+
+    await transporter.sendMail(mailOptions);
+}
+
+// Route to handle rejection of an upload
+app.get('/reject/:tempId', (req, res) => {
+    const tempId = req.params.tempId;
+
+    if (tempUploads[tempId]) {
+        delete tempUploads[tempId]; 
+        res.send('Upload rejected');
+    } else {
+        res.status(404).send('No pending upload found for this ID');
+    }
+});
+
+// Route to display the edit form for an upload
+app.get('/edit/:tempId', (req, res) => {
+    const tempId = req.params.tempId;
+
+    if (tempUploads[tempId]) {
+        res.render('edit', { data: tempUploads[tempId], tempId });
+    } else {
+        res.status(404).send('No pending upload found for this ID');
+    }
+});
+
+// Route to handle edit form submission and save data to the database
+app.post('/edit/:tempId', async (req, res) => {
+    const tempId = req.params.tempId;
+    const { text, userId } = req.body;
+
+    if (tempUploads[tempId]) {
+        tempUploads[tempId].text = text;
+        tempUploads[tempId].userId = new ObjectId(userId);
+
+        try {
+            await eventCollection.insertOne(tempUploads[tempId]);
+            delete tempUploads[tempId];
+            res.send('Data saved to the database successfully');
+        } catch (err) {
+            console.error(`Error saving data to database: ${err}`);
+            res.status(500).send('Internal server error');
+        }
+    } else {
+        res.status(404).send('No pending upload found for this ID');
     }
 });
 
@@ -94,6 +172,7 @@ app.post('/signup', async (req, res) => {
         const insertResult = await otpCollection.insertOne({
             email: user.email,
             password: hashedPassword,
+            username:user.userName,
             otp,
             expires_at: expirationTime,
             verified: false 
@@ -189,14 +268,15 @@ app.post('/login', async (req, res) => {
 
     try {
         const storedUser = await collection.findOne({ email: emailLower });
+        const storedUsername = await collection.findOne({ username: emailLower });
 
-        if (!storedUser) {
+        if (!storedUser && !storedUsername) {
             console.log(`User not found for email: ${emailLower}`);
             res.status(401).send('Incorrect username/password');
             return;
         }
 
-        console.log(`User found: ${storedUser.email}`);
+        console.log(`User found: ${storedUser.email} and ${storedUsername.username}`);
 
         const isMatch = await bcrypt.compare(password, storedUser.password);
         if (!isMatch) {

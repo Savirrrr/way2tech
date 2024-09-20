@@ -43,6 +43,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             builder: (context) => OTPVerificationPage(
                   email: email,
                   isRegistration: false,
+                  username: "",
                 )),
       );
     } else {

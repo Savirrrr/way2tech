@@ -45,8 +45,7 @@ const upload = multer({ storage: storage });
 
 // Handle file uploads
 app.post('/upload', upload.single('media'), async (req, res) => {
-    console.log(req.body);
-    const { title, caption , email} = req.body; // Adjusted to match the input names in `upload.dart`
+    const { title, caption , email} = req.body;
     let mediaData;
     let mediaContentType;
     let mediaOriginalName;
@@ -54,12 +53,11 @@ app.post('/upload', upload.single('media'), async (req, res) => {
     if (req.file) {
         mediaData = req.file.buffer;
         mediaContentType = req.file.mimetype;
-        mediaOriginalName=req.file.originalname;
+        mediaOriginalName = req.file.originalname;
     } else {
-        // Optional: Use a default image if no file is uploaded
-        mediaData = fs.readFileSync('path/to/default.jpg'); 
-        mediaContentType = 'image/jpeg'; 
-        mediaOriginalName='default.jpg';
+        mediaData = fs.readFileSync('path/to/default.jpg');
+        mediaContentType = 'image/jpeg';
+        mediaOriginalName = 'default.jpg';
     }
 
     const tempId = new ObjectId(); 
@@ -83,7 +81,7 @@ app.post('/upload', upload.single('media'), async (req, res) => {
     }
 });
 
-async function sendApprovalEmail(tempId, userId, text, mediaOriginalName, mediaData, mediaContentType) {
+async function sendApprovalEmail(tempId, userId, text, mediaData, mediaContentType, mediaOriginalName) {
     const editLink = `http://localhost:3000/edit/${tempId}`;
     const rejectLink = `http://localhost:3000/reject/${tempId}`;
 
@@ -186,11 +184,12 @@ app.post('/signup', async (req, res) => {
         const expirationTime = new Date(Date.now() + 10 * 60 * 1000);
 
         console.log(`Generated OTP: ${otp}, Expiration Time: ${expirationTime}`);
-
+        console.log(user.username);
+        
         const insertResult = await otpCollection.insertOne({
             fname:user.firstName,
             lname:user.lastName,
-            username:user.userName,
+            username:user.username,
             email: user.email,
             password: hashedPassword,
             otp,
@@ -222,20 +221,13 @@ app.post('/signup', async (req, res) => {
 
 // Verify OTP and move user details to the main collection
 app.post('/verifySignupOtp', async (req, res) => {
-    const { email, otp } = req.body;
-
+    const { email, username, otp } = req.body;
+    console.log(username);
+    
     try {
         const emailLower = email.toLowerCase();
         const otpRecord = await otpCollection.findOne({ email: emailLower, otp });
-        await collection.insertOne({
-            username:otpRecord.username,
-            firstname: otpRecord.fname,
-            lastname: otpRecord.lname,
-            email: otpRecord.email,
-            password: otpRecord.password
 
-            
-        });
         if (!otpRecord) {
             console.log('OTP record not found or mismatch');
             res.status(401).send('Invalid or expired OTP');
@@ -248,11 +240,18 @@ app.post('/verifySignupOtp', async (req, res) => {
             return;
         }
 
-        
+        // Insert user data into the main collection
+        const userData = {
+            username: username,
+            firstname: otpRecord.fname,
+            lastname: otpRecord.lname,
+            email: otpRecord.email,
+            password: otpRecord.password
+        };
 
+        await collection.insertOne(userData);
         await otpCollection.deleteOne({ email: emailLower, otp });
 
-        console.log(`User verified and added to database: ${emailLower}`);
         res.status(200).send('User verified and added to database');
     } catch (err) {
         console.error(`Error verifying OTP: ${err}`);
@@ -290,40 +289,45 @@ async function sendEmail(to, subject, body) {
 // Handle login
 app.post('/login', async (req, res) => {
     const { emailOrUsername, password } = req.body;
-
+    console.log("LOGIN");
+    console.log(emailOrUsername,password);
+    
     // Check if emailOrUsername and password are provided
     if (!emailOrUsername || !password) {
         return res.status(400).send('Email/Username and password are required');
     }
 
-    // Convert emailOrUsername to lowercase
-    const emailOrUsernameLower = emailOrUsername.toLowerCase();
-
-    console.log(`Login attempt with: ${emailOrUsernameLower}`);
+    console.log(`Login attempt with: ${emailOrUsername}`);
 
     try {
+        // Check if it's an email or a username
+        let searchQuery;
+        if (emailOrUsername.includes('@')) {
+            // If it's an email, make it case-insensitive
+            searchQuery = { email: { $regex: new RegExp(`^${emailOrUsername}$`, 'i') } };
+        } else {
+            // If it's a username, don't change the case
+            searchQuery = { username: emailOrUsername };
+        }
+
         // Search for the user by either email or username
-        const storedUser = await collection.findOne({
-            $or: [
-                { email: emailOrUsernameLower },
-                { username: emailOrUsernameLower }
-            ]
-        });
+        const storedUser = await collection.findOne(searchQuery);
 
         if (!storedUser) {
-            console.log(`User not found for: ${emailOrUsernameLower}`);
+            console.log(`User not found for: ${emailOrUsername}`);
             return res.status(401).send('Incorrect username/email or password');
         }
 
         console.log(`User found: ${storedUser.email}`);
 
+        // Compare the provided password with the stored hashed password
         const isMatch = await bcrypt.compare(password, storedUser.password);
         if (!isMatch) {
-            console.log(`Incorrect password for user: ${emailOrUsernameLower}`);
+            console.log(`Incorrect password for user: ${emailOrUsername}`);
             return res.status(401).send('Incorrect username/email or password');
         }
 
-        console.log(`User logged in successfully: ${emailOrUsernameLower}`);
+        console.log(`User logged in successfully: ${emailOrUsername}`);
         return res.status(200).send('User logged in successfully');
     } catch (err) {
         console.error(`Error during login: ${err}`);

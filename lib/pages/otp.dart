@@ -8,9 +8,14 @@ import 'login_page.dart'; // Import the Login page
 
 class OTPVerificationPage extends StatefulWidget {
   final String email;
-  final bool isRegistration; // Pass this parameter to decide redirection
+  final bool isRegistration;
 
-  OTPVerificationPage({required this.email, required this.isRegistration});
+  final String username; // Pass this parameter to decide redirection
+
+  OTPVerificationPage(
+      {required this.email,
+      required this.isRegistration,
+      required this.username});
 
   @override
   _OTPVerificationPageState createState() => _OTPVerificationPageState();
@@ -74,7 +79,8 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
             ? 'http://192.168.31.154:3000/verifySignupOtp'
             : 'http://192.168.31.154:3000/verifyForgotPasswordOtp'),
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode({'email': widget.email, 'otp': otp}),
+        body: jsonEncode(
+            {'email': widget.email, 'username': widget.username, 'otp': otp}),
       );
 
       if (response.statusCode == 200) {

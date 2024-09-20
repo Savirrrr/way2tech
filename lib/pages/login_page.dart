@@ -53,7 +53,7 @@ class _LoginpageState extends State<Loginpage> {
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, String>{
-        'email': email,
+        'emailOrUsername': email,
         'password': password,
       }),
     );

@@ -384,7 +384,7 @@ class _SignUpPageState extends State<SignUpPage> {
     String email = _emailController.text;
     String password = _passwordController.text;
     String confirmPassword = _confirmPasswordController.text;
-
+    print("*****************************************" + username);
     if (username.isEmpty || firstName.isEmpty || lastName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all the fields')),
@@ -436,6 +436,7 @@ class _SignUpPageState extends State<SignUpPage> {
           MaterialPageRoute(
               builder: (context) => OTPVerificationPage(
                     email: email,
+                    username: username,
                     isRegistration: true,
                   )),
         );

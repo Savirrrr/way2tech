@@ -14,6 +14,7 @@ app.use(cors());
 
 const client = new MongoClient("mongodb+srv://peecharasavir:DLv37jsi391FY9MR@cluster0.jv90ftt.mongodb.net/?retryWrites=true&w=majority");
 
+let i=0;
 let collection;
 let otpCollection;
 let dataCollection;
@@ -59,12 +60,13 @@ app.post('/upload', upload.single('media'), async (req, res) => {
         mediaContentType = 'image/jpeg';
         mediaOriginalName = 'default.jpg';
     }
-
+    
     const tempId = new ObjectId(); 
     tempUploads[tempId] = {
         userId: new ObjectId(userId),
         text: text,
         media: {
+            index:i,
             data: mediaData,
             contentType: mediaContentType,
             originalName: mediaOriginalName
@@ -141,6 +143,7 @@ app.post('/edit/:tempId', async (req, res) => {
 
         try {
             await eventCollection.insertOne(tempUploads[tempId]);
+            i+=1;
             delete tempUploads[tempId];
             res.send('Data saved to the database successfully');
         } catch (err) {

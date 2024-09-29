@@ -14,7 +14,7 @@ class HomePage extends StatelessWidget {
       body: const Card(
         color: Colors.white,
       ),
-      bottomNavigationBar: Navbar(email: email), // Pass email to Navbar
+      bottomNavigationBar: Navbar(email: email),
     );
   }
 }

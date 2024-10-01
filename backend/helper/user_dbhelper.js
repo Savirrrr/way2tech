@@ -6,9 +6,11 @@ const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
 const multer = require('multer');
 const fs = require('fs');
+const { emit } = require('process');
 
 const app = express();
 app.set('view engine', 'ejs');
+app.set('views',path.join(__dirname,'../../views'));
 app.use(express.json());
 app.use(cors());
 
@@ -63,10 +65,11 @@ app.post('/upload', upload.single('media'), async (req, res) => {
     
     const tempId = new ObjectId(); 
     tempUploads[tempId] = {
-        userId: new ObjectId(userId),
-        text: text,
+        index:i,
+        title:title,
+        userId: email,
+        text: caption,
         media: {
-            index:i,
             data: mediaData,
             contentType: mediaContentType,
             originalName: mediaOriginalName
@@ -75,7 +78,7 @@ app.post('/upload', upload.single('media'), async (req, res) => {
     };
 
     try {
-        await sendApprovalEmail(tempId, userId, text, mediaData, mediaContentType, mediaOriginalName, email);
+        await sendApprovalEmail(tempId,caption, title,mediaData, mediaContentType, mediaOriginalName,email);
         res.status(200).send('Email sent for approval');
     } catch (err) {
         console.error(`Error sending email: ${err}`);
@@ -83,17 +86,29 @@ app.post('/upload', upload.single('media'), async (req, res) => {
     }
 });
 
-async function sendApprovalEmail(tempId, userId, text, mediaData, mediaContentType, mediaOriginalName) {
+async function sendApprovalEmail(tempId,title, caption,mediaData, mediaContentType, mediaOriginalName,email) {
     const editLink = `http://localhost:3000/edit/${tempId}`;
     const rejectLink = `http://localhost:3000/reject/${tempId}`;
 
+    const from = 'mailer.learnx@gmail.com';
+    const password = 'glfd kcgf dhpx hiwk';
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: from,
+            pass: password
+        }
+    });
+
     let mailOptions = {
-        from: 'balasubramanyamchilukala@gmail.com',
-        to: 'baluchilukala900@gmail.com',
+        from: from,
+        to: from,
         subject: 'Upload Approval Required',
         html: `
-            <p>User ID: ${userId}</p>
-            <p>Text: ${text}</p>
+            <p>User ID: ${email}</p>
+            <p>Title: ${title}</p>
+            <p>Body : ${caption}</p>
             <p>Please review the upload and approve or reject it:</p>
             <a href="${editLink}">Accept and Edit</a> | <a href="${rejectLink}">Reject</a>
         `,
@@ -107,6 +122,9 @@ async function sendApprovalEmail(tempId, userId, text, mediaData, mediaContentTy
     };
 
     await transporter.sendMail(mailOptions);
+    console.log("function validated");
+    // res.status(200).send('Your request has been sent for verification');
+    
 }
 
 // Route to handle rejection of an upload
@@ -433,6 +451,25 @@ app.post('/verifyForgotPasswordOtp', async (req, res) => {
         console.error(`Error verifying OTP: ${err}`);
         res.status(500).send('Internal server error');
     }
+});
+
+app.post("/updateprofileusername", async (req,res)=>{
+    const  {uname,updatedUname}=req.body;
+    const user = await collection.findOne({ username: uname });
+    if (!user) {
+        res.status(500).send('User not found');
+    }
+    try
+    {
+    const updatedUser = await collection.updateOne({ username: uname }, { $set: { username: updatedUname}});
+    res.status(200).send('Username updated successfully');
+    }
+    catch(err)
+    {
+        console.error('error in updating username');
+        res.status(500).send('couldnt update username');
+    }
+
 });
 
 // Start the server

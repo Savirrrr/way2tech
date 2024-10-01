@@ -41,6 +41,7 @@ class _UploadPageState extends State<UploadPage> {
       final request = http.MultipartRequest('POST', Uri.parse(uploadUrl));
       request.fields['title'] = titleController.text;
       request.fields['caption'] = captionController.text;
+      request.fields['email'] = widget.email;
       // request.fields['userId'] = 'your_user_id'; // Replace with actual userId
 
       if (_imageFile != null) {

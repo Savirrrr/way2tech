@@ -7,10 +7,11 @@ const cors = require('cors');
 const multer = require('multer');
 const fs = require('fs');
 const { emit } = require('process');
+const path=require('path');
 
 const app = express();
 app.set('view engine', 'ejs');
-app.set('views',path.join(__dirname,'../../views'));
+app.set('views', path.join(__dirname, '../../views'));
 app.use(express.json());
 app.use(cors());
 
@@ -29,7 +30,7 @@ async function connectDB() {
         collection = client.db("user_info").collection("users");
         otpCollection = client.db("user_info").collection("otp_tokens");
         dataCollection=client.db("user_info").collection("data");
-        eventCollection=client.db("users_info").collection("events")
+        eventCollection=client.db("user_info").collection("events")
         console.log("Connected to MongoDB!");
     } catch (err) {
         console.error(err);
@@ -62,6 +63,7 @@ app.post('/upload', upload.single('media'), async (req, res) => {
         mediaContentType = 'image/jpeg';
         mediaOriginalName = 'default.jpg';
     }
+    console.log(caption);
     
     const tempId = new ObjectId(); 
     tempUploads[tempId] = {

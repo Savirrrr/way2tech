@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:way2techv1/pages/app_bar.dart';
 import 'package:way2techv1/pages/nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:typed_data'; // For handling base64 data
 import 'dart:math';
 
 class UploadData {
@@ -20,9 +22,10 @@ class UploadData {
   factory UploadData.fromJson(Map<String, dynamic> json) {
     return UploadData(
       title: json['title'],
-      caption: json['caption'],
-      username: json['username'],
-      mediaUrl: json['media'],
+      caption: json['text'],
+      username: json['userId'],
+      // Handle media as a nested object
+      mediaUrl: json['media'] != null ? json['media']['data'] : '',
     );
   }
 }
@@ -35,7 +38,7 @@ class RandomNumberGenerator {
   Future<void> _retrieveMaxIndex() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.0.148:3000/maxIndex'),
+        Uri.parse('http://192.168.31.154:3000/maxIndex'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -109,11 +112,10 @@ class _HomePageState extends State<HomePage> {
 
       if (randomIndex != null) {
         final response = await http.post(
-          Uri.parse('http://192.168.0.148:3000/retreiveData'),
+          Uri.parse('http://192.168.31.154:3000/retreiveData'),
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
           body: jsonEncode({'index': randomIndex}),
         );
-        print(response.body);
 
         if (response.statusCode == 200) {
           final Map<String, dynamic> data = jsonDecode(response.body);
@@ -151,9 +153,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text("Uploaded Data"),
-      // ),
+      appBar: CustomAppBar(),
       body: RefreshIndicator(
         onRefresh: _refreshPage, // Pull-to-refresh action
         child: isLoading
@@ -165,17 +165,23 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       // Title
                       Text(
-                        "Title: ${uploadedData!.title}",
+                        "${uploadedData!.title}",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 20, // Larger font size for title
+                          fontSize: 25, // Larger font size for title
                         ),
                       ),
                       const SizedBox(
                           height: 16), // Space between title and image
 
-                      // Image
-                      Image.network(uploadedData!.mediaUrl),
+                      // Image (if mediaUrl is base64 encoded data)
+                      uploadedData!.mediaUrl.isNotEmpty
+                          ? Image.memory(
+                              base64Decode(uploadedData!.mediaUrl),
+                              height: 300,
+                              width: double.infinity,
+                            )
+                          : const Text("No image available"),
                       const SizedBox(
                           height: 8), // Space between image and username/email
 
@@ -194,7 +200,7 @@ class _HomePageState extends State<HomePage> {
 
                       // Caption
                       Text(
-                        "Caption: ${uploadedData!.caption}",
+                        "Content: ${uploadedData!.caption}",
                         style: const TextStyle(
                           fontSize: 16, // Normal font size for caption
                         ),

@@ -220,9 +220,9 @@ app.post('/retreiveData', async (req, res) => {
 
         if (data) {
             // console.log(data);
-            console.log(data.index);
+            console.log(data.media,data.userId,data.title,data.text);
             
-            res.status(200).send(data);
+            res.status(200).send(data/*.title,data.text.userId,data.media*/);
         } else {
             console.log("Error finding data");
             res.status(404).send("No data found");

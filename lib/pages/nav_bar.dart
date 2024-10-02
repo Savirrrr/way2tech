@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:way2techv1/pages/account.dart';
+import 'package:way2techv1/pages/home.dart';
 import 'package:way2techv1/pages/upload.dart';
 
 class Navbar extends StatelessWidget {
@@ -24,7 +25,12 @@ class Navbar extends StatelessWidget {
                 if (onHomeTapped != null) {
                   onHomeTapped!(); // Just refresh the home data without navigating
                 }
-                context.go('/home');
+                // context.go('/home');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => HomePage(email: email)),
+                );
               },
             ),
             IconButton(

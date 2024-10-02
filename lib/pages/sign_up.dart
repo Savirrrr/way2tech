@@ -43,7 +43,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Future<bool> _isUsernameTaken(String username) async {
     var response = await http.get(
-      Uri.parse('http://192.168.31.154:3000/check-username/$username'),
+      Uri.parse('http://192.168.0.148:3000/check-username/$username'),
     );
 
     if (response.statusCode == 200) {
@@ -90,7 +90,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       var response = await http.post(
-        Uri.parse('http://192.168.31.154:3000/signup'),
+        Uri.parse('http://192.168.0.148:3000/signup'),
         headers: {
           'Content-Type': 'application/json',
         },

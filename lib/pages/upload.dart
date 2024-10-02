@@ -35,7 +35,7 @@ class _UploadPageState extends State<UploadPage> {
 
   Future<void> _uploadData() async {
     const String uploadUrl =
-        'http://192.168.31.154:3000/upload'; // Update with your backend URL
+        'http://192.168.0.148:3000/upload'; // Update with your backend URL
 
     try {
       final request = http.MultipartRequest('POST', Uri.parse(uploadUrl));

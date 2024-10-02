@@ -22,7 +22,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     });
 
     final response = await http.post(
-      Uri.parse('http://192.168.31.154:3000/forgotpwd'),
+      Uri.parse('http://192.168.0.148:3000/forgotpwd'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },

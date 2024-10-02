@@ -8,6 +8,7 @@ const multer = require('multer');
 const fs = require('fs');
 const { emit } = require('process');
 const path=require('path');
+const { log } = require('console');
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -144,7 +145,8 @@ app.get('/reject/:tempId', (req, res) => {
 // Route to display the edit form for an upload
 app.get('/edit/:tempId', (req, res) => {
     const tempId = req.params.tempId;
-
+    console.log(req.body);
+    
     if (tempUploads[tempId]) {
         res.render('edit', { data: tempUploads[tempId], tempId });
     } else {
@@ -156,13 +158,15 @@ app.get('/edit/:tempId', (req, res) => {
 app.post('/edit/:tempId', async (req, res) => {
     const tempId = req.params.tempId;
     const { text, userId } = req.body;
+    console.log(req.body);
+    
 
     if (tempUploads[tempId]) {
         tempUploads[tempId].text = text;
-        tempUploads[tempId].userId = new ObjectId(userId);
+        tempUploads[tempId].userId = userId;
 
         try {
-            await eventCollection.insertOne(tempUploads[tempId]);
+            await uploadCollection.insertOne(tempUploads[tempId]);
             i+=1;
             delete tempUploads[tempId];
             res.send('Data saved to the database successfully');
@@ -216,6 +220,8 @@ app.post('/retreiveData', async (req, res) => {
 
         if (data) {
             // console.log(data);
+            console.log(data.index);
+            
             res.status(200).send(data);
         } else {
             console.log("Error finding data");

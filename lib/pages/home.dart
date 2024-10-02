@@ -22,7 +22,7 @@ class UploadData {
       title: json['title'],
       caption: json['caption'],
       username: json['username'],
-      mediaUrl: json['media'], // Adjust according to your API response
+      mediaUrl: json['media'],
     );
   }
 }
@@ -35,7 +35,7 @@ class RandomNumberGenerator {
   Future<void> _retrieveMaxIndex() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.31.154:3000/maxIndex'),
+        Uri.parse('http://192.168.0.148:3000/maxIndex'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -109,13 +109,15 @@ class _HomePageState extends State<HomePage> {
 
       if (randomIndex != null) {
         final response = await http.post(
-          Uri.parse('http://192.168.31.154:3000/retreiveData'),
+          Uri.parse('http://192.168.0.148:3000/retreiveData'),
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
           body: jsonEncode({'index': randomIndex}),
         );
+        print(response.body);
 
         if (response.statusCode == 200) {
           final Map<String, dynamic> data = jsonDecode(response.body);
+          print("Decode process ended");
           setState(() {
             uploadedData = UploadData.fromJson(data);
             print(uploadedData);

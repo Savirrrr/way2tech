@@ -5,35 +5,36 @@ import 'package:way2techv1/pages/upload.dart';
 
 class Navbar extends StatelessWidget {
   final String email;
+  final VoidCallback? onHomeTapped;
 
-  const Navbar({super.key, required this.email});
+  const Navbar({super.key, required this.email, this.onHomeTapped});
 
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      color:
-          Colors.white, // Assuming the background is white based on the image
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              icon: const Icon(Icons.home, color: Colors.black), // Home icon
+              icon: const Icon(Icons.home, color: Colors.black),
               onPressed: () {
-                // Home navigation logic
+                if (onHomeTapped != null) {
+                  onHomeTapped!(); // Just refresh the home data without navigating
+                }
+                context.go('/home');
               },
             ),
             IconButton(
-              icon: const Icon(Icons.explore,
-                  color: Colors.black), // Compass/explore icon
+              icon: const Icon(Icons.explore, color: Colors.black),
               onPressed: () {
-                // Explore navigation logic
+                context.go('/explore'); // Navigate to the explore page route
               },
             ),
             IconButton(
-              icon:
-                  const Icon(Icons.upload, color: Colors.black), // Upload icon
+              icon: const Icon(Icons.upload, color: Colors.black),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -44,16 +45,15 @@ class Navbar extends StatelessWidget {
               },
             ),
             IconButton(
-              icon: Icon(Icons.business,
-                  color: Colors.black), // Business/briefcase icon
+              icon: const Icon(Icons.business, color: Colors.black),
               onPressed: () {
-                // Business navigation logic
+                context.go('/business'); // Navigate to the business page route
               },
             ),
             IconButton(
-              icon: Icon(Icons.person, color: Colors.black), // Person icon
+              icon: const Icon(Icons.person, color: Colors.black),
               onPressed: () {
-                // Navigate to AccountPage and pass the email
+                // Navigate to AccountPage with email
                 Navigator.push(
                   context,
                   MaterialPageRoute(

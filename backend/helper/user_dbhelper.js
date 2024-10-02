@@ -13,6 +13,7 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../../views'));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); 
 app.use(cors());
 
 const client = new MongoClient("mongodb+srv://peecharasavir:DLv37jsi391FY9MR@cluster0.jv90ftt.mongodb.net/?retryWrites=true&w=majority");
@@ -21,7 +22,7 @@ let i=0;
 let collection;
 let otpCollection;
 let dataCollection;
-let eventCollection;
+let uploadCollection;
 let tempUploads = {}; 
 
 async function connectDB() {
@@ -30,7 +31,7 @@ async function connectDB() {
         collection = client.db("user_info").collection("users");
         otpCollection = client.db("user_info").collection("otp_tokens");
         dataCollection=client.db("user_info").collection("data");
-        eventCollection=client.db("user_info").collection("events")
+        uploadCollection=client.db("user_info").collection("uploads")
         console.log("Connected to MongoDB!");
     } catch (err) {
         console.error(err);
@@ -47,7 +48,6 @@ async function connectDB() {
 const storage = multer.memoryStorage(); 
 const upload = multer({ storage: storage });
 
-// Handle file uploads
 app.post('/upload', upload.single('media'), async (req, res) => {
     const { title, caption , email} = req.body;
     let mediaData;
@@ -190,6 +190,40 @@ app.get('/check-username/:username', async (req,res)=>{
     } catch (error) {
       console.error('Error checking username:', error);
       return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+//to retreive max index of the uploaded data
+app.get('/maxIndex', async (req, res) => {
+    try {
+      res.status(200).send(i.toString());
+      console.log("index",i);
+      
+    } catch (err) {
+      console.error('Error retrieving max index:', err);
+      res.status(500).send('Internal server error');
+    }
+  });
+  
+
+//retreive uploaded data
+app.post('/retreiveData', async (req, res) => {
+    try {
+        const { index } = req.body; 
+        console.log("received index",i);
+        // Extract index from request body
+        const data = await uploadCollection.findOne({ index: (parseInt(index)) }); // Make sure index is an integer
+
+        if (data) {
+            // console.log(data);
+            res.status(200).send(data);
+        } else {
+            console.log("Error finding data");
+            res.status(404).send("No data found");
+        }
+    } catch (err) {
+        console.error('Error retrieving data:', err);
+        res.status(500).send('Internal server error');
     }
 });
 

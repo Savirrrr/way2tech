@@ -29,7 +29,7 @@ class Navbar extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => HomePage(email: email)),
+                      builder: (context) => FlipPageView(email: email)),
                 );
               },
             ),

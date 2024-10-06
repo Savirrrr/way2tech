@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:way2techv1/pages/app_bar.dart';
-import 'package:way2techv1/pages/nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:typed_data'; // For handling base64 data
-import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:way2techv1/pages/app_bar.dart';
+import 'package:way2techv1/pages/nav_bar.dart'; // For handling base64 data
 
 class UploadData {
   final String title;
@@ -21,20 +21,52 @@ class UploadData {
 
   factory UploadData.fromJson(Map<String, dynamic> json) {
     return UploadData(
-      title: json['title'],
-      caption: json['text'],
-      username: json['userId'],
-      // Handle media as a nested object
+      title: json['title'] ?? 'No Title',
+      caption: json['text'] ?? 'No Caption',
+      username: json['userId'] ?? 'Unknown User',
       mediaUrl: json['media'] != null ? json['media']['data'] : '',
     );
   }
 }
 
-class RandomNumberGenerator {
-  int? _maxIndex;
-  Set<int> _generatedNumbers = {};
+class ReverseNumberGenerator {
+  int _currentIndex;
 
-  // Function to retrieve max index from the backend
+  ReverseNumberGenerator(this._currentIndex);
+
+  int? generatePreviousNumber() {
+    if (_currentIndex >= 0) {
+      return _currentIndex--;
+    }
+    return null;
+  }
+}
+
+class FlipPageView extends StatefulWidget {
+  final String email;
+
+  const FlipPageView({super.key, required this.email});
+
+  @override
+  State<FlipPageView> createState() => _FlipPageViewState();
+}
+
+class _FlipPageViewState extends State<FlipPageView> {
+  PageController _pageController = PageController();
+  List<UploadData> _pagesData = [];
+  bool isLoading = true;
+  ReverseNumberGenerator? rng;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData(); // Load the initial page
+  }
+
+  Future<void> _loadInitialData() async {
+    await _retrieveMaxIndex();
+  }
+
   Future<void> _retrieveMaxIndex() async {
     try {
       final response = await http.get(
@@ -43,8 +75,9 @@ class RandomNumberGenerator {
       );
 
       if (response.statusCode == 200) {
-        _maxIndex = int.parse(response.body);
-        print("Max Index: $_maxIndex");
+        final maxIndex = int.parse(response.body);
+        rng = ReverseNumberGenerator(maxIndex - 1); // Initialize with max index
+        _fetchData(); // Fetch the first set of data
       } else {
         print(
             "Failed to retrieve max index. Status code: ${response.statusCode}");
@@ -54,76 +87,22 @@ class RandomNumberGenerator {
     }
   }
 
-  int? generateUniqueRandomNumber() {
-    if (_maxIndex != null) {
-      if (_generatedNumbers.length >= _maxIndex! + 1) {
-        print("All numbers have been generated already.");
-        return null;
-      }
-
-      Random random = Random();
-      int randomNumber;
-
-      do {
-        randomNumber = random.nextInt(_maxIndex! + 1);
-      } while (_generatedNumbers.contains(randomNumber));
-
-      _generatedNumbers.add(randomNumber);
-      return randomNumber;
-    } else {
-      return null;
-    }
-  }
-
-  Future<int?> getMaxIndexAndGenerateRandom() async {
-    await _retrieveMaxIndex();
-    return generateUniqueRandomNumber();
-  }
-}
-
-class HomePage extends StatefulWidget {
-  final String email;
-
-  const HomePage({super.key, required this.email});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  UploadData? uploadedData;
-  bool isLoading = true; // To track loading state
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchData(); // Fetch data when the page is first opened
-  }
-
-  // Function to fetch data from the backend and update the UI
   Future<void> _fetchData() async {
-    setState(() {
-      isLoading = true; // Show loading indicator
-    });
+    if (rng != null) {
+      final int? currentIndex = rng!.generatePreviousNumber();
 
-    try {
-      RandomNumberGenerator rng = RandomNumberGenerator();
-      final int? randomIndex = await rng.getMaxIndexAndGenerateRandom();
-
-      if (randomIndex != null) {
+      if (currentIndex != null) {
         final response = await http.post(
           Uri.parse('http://192.168.31.154:3000/retreiveData'),
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: jsonEncode({'index': randomIndex}),
+          body: jsonEncode({'index': currentIndex}),
         );
 
         if (response.statusCode == 200) {
           final Map<String, dynamic> data = jsonDecode(response.body);
-          print("Decode process ended");
           setState(() {
-            uploadedData = UploadData.fromJson(data);
-            print(uploadedData);
-            isLoading = false; // Hide loading indicator
+            _pagesData.add(UploadData.fromJson(data));
+            isLoading = false;
           });
         } else {
           print("Failed to retrieve data. Status code: ${response.statusCode}");
@@ -132,88 +111,177 @@ class _HomePageState extends State<HomePage> {
           });
         }
       } else {
-        print("No valid random index could be generated.");
-        setState(() {
-          isLoading = false;
-        });
+        print("No more pages to fetch.");
       }
-    } catch (err) {
-      print("Error: $err");
-      setState(() {
-        isLoading = false;
-      });
     }
-  }
-
-  // Function to handle pull-to-refresh
-  Future<void> _refreshPage() async {
-    await _fetchData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
-      body: RefreshIndicator(
-        onRefresh: _refreshPage, // Pull-to-refresh action
-        child: isLoading
-            ? const Center(
-                child: CircularProgressIndicator()) // Show loading indicator
-            : uploadedData != null
-                ? ListView(
-                    padding: const EdgeInsets.all(16.0),
+      // appBar: CustomAppBar(),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _pagesData.isNotEmpty
+              ? PageView.builder(
+                  controller: _pageController,
+                  itemCount: _pagesData.length + 1, // +1 for "caught up" page
+                  itemBuilder: (context, index) {
+                    if (index < _pagesData.length) {
+                      return _buildFlipPage(_pagesData[index], index);
+                    } else {
+                      return _buildCaughtUpPage();
+                    }
+                  },
+                  onPageChanged: (index) {
+                    if (index == _pagesData.length - 1) {
+                      _fetchData(); // Load next page data when scrolled to last page
+                    }
+                  },
+                  scrollDirection: Axis.vertical, // Vertical page scrolling
+                )
+              : const Center(
+                  child: Text("No data retrieved yet."),
+                ),
+      bottomNavigationBar: Navbar(email: widget.email),
+    );
+  }
+
+  Widget _buildFlipPage(UploadData data, int index) {
+    return AnimatedBuilder(
+      animation: _pageController,
+      builder: (context, child) {
+        double pagePosition = 0;
+        if (_pageController.position.hasContentDimensions) {
+          pagePosition = _pageController.page! - index;
+        }
+        double angle = pagePosition.clamp(-1, 1) * (3.14 / 2);
+
+        // Define a widget for folding the page top half with only title and image
+        Widget _buildTopHalf() {
+          return Transform(
+            alignment: Alignment.bottomCenter,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001) // Perspective effect
+              ..rotateX(
+                  angle > 0 ? angle : 0), // Fold only in forward direction
+            child: ClipRect(
+              child: Align(
+                alignment: Alignment.topCenter,
+                heightFactor: 0.5,
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title
                       Text(
-                        "${uploadedData!.title}",
+                        data.title,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 25, // Larger font size for title
+                          fontSize: 25,
                         ),
                       ),
-                      const SizedBox(
-                          height: 16), // Space between title and image
-
-                      // Image (if mediaUrl is base64 encoded data)
-                      uploadedData!.mediaUrl.isNotEmpty
+                      const SizedBox(height: 16),
+                      data.mediaUrl.isNotEmpty
                           ? Image.memory(
-                              base64Decode(uploadedData!.mediaUrl),
-                              height: 300,
+                              base64Decode(data.mediaUrl),
+                              height: 200,
                               width: double.infinity,
+                              fit: BoxFit.cover,
                             )
                           : const Text("No image available"),
-                      const SizedBox(
-                          height: 8), // Space between image and username/email
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
 
-                      // Username or email
+        // Define a widget for folding the page bottom half with rest of the details
+        Widget _buildBottomHalf() {
+          return Transform(
+            alignment: Alignment.topCenter,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001) // Perspective effect
+              ..rotateX(
+                  angle < 0 ? angle : 0), // Fold only in backward direction
+            child: ClipRect(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                heightFactor: 0.5,
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        uploadedData!.username,
+                        data.username,
                         style: TextStyle(
-                          fontSize: 14, // Smaller font size for username/email
-                          color:
-                              Colors.grey[600], // Grey color for username/email
+                          fontSize: 14,
+                          color: Colors.grey[600],
                         ),
                       ),
-                      const SizedBox(
-                          height:
-                              16), // Space between username/email and caption
-
-                      // Caption
+                      const SizedBox(height: 16),
                       Text(
-                        "Content: ${uploadedData!.caption}",
-                        style: const TextStyle(
-                          fontSize: 16, // Normal font size for caption
-                        ),
+                        data.caption,
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ],
-                  )
-                : const Center(
-                    child: Text("No data retrieved yet."),
                   ),
-      ),
-      bottomNavigationBar: Navbar(
-        email: widget.email,
-        onHomeTapped: _fetchData, // Trigger data fetch when home is tapped
+                ),
+              ),
+            ),
+          );
+        }
+
+        return Stack(
+          children: [
+            // Render top half of the page
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: MediaQuery.of(context).size.height / 2,
+              child: _buildTopHalf(),
+            ),
+            // Render bottom half of the page
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: MediaQuery.of(context).size.height / 2,
+              child: _buildBottomHalf(),
+            ),
+            if (pagePosition.abs() < 1) // Add a crease line in the middle
+              Positioned(
+                top: MediaQuery.of(context).size.height / 2 - 1,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 2,
+                  color: Colors.black.withOpacity(0.5),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildCaughtUpPage() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          "You're all caught up!",
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            color: Colors.green,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

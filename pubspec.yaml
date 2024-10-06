@@ -37,6 +37,7 @@ dependencies:
   shared_preferences:
   image_picker:
   http_parser: 
+  flip_card:
 
 
 

@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
               builder: (context, state) {
                 final email = state.extra as String? ??
                     ''; // Extract the email from the state
-                return HomePage(email: email);
+                return FlipPageView(email: email);
               },
             ),
             GoRoute(

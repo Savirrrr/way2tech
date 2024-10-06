@@ -19,7 +19,7 @@ app.use(cors());
 
 const client = new MongoClient("mongodb+srv://peecharasavir:DLv37jsi391FY9MR@cluster0.jv90ftt.mongodb.net/?retryWrites=true&w=majority");
 
-let i=0;
+let i=1;
 let collection;
 let otpCollection;
 let dataCollection;
@@ -79,6 +79,7 @@ app.post('/upload', upload.single('media'), async (req, res) => {
         },
         uploadedAt: new Date(),
     };
+    i+=1;
 
     try {
         await sendApprovalEmail(tempId,caption, title,mediaData, mediaContentType, mediaOriginalName,email);
@@ -167,7 +168,6 @@ app.post('/edit/:tempId', async (req, res) => {
 
         try {
             await uploadCollection.insertOne(tempUploads[tempId]);
-            i+=1;
             delete tempUploads[tempId];
             res.send('Data saved to the database successfully');
         } catch (err) {

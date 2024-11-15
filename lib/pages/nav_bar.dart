@@ -33,12 +33,12 @@ class Navbar extends StatelessWidget {
                 );
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.explore, color: Colors.black),
-              onPressed: () {
-                context.go('/explore'); // Navigate to the explore page route
-              },
-            ),
+            // IconButton(
+            //   icon: const Icon(Icons.explore, color: Colors.black),
+            //   onPressed: () {
+            //     context.go('/explore'); // Navigate to the explore page route
+            //   },
+            // ),
             IconButton(
               icon: const Icon(Icons.upload, color: Colors.black),
               onPressed: () {

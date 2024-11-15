@@ -70,14 +70,16 @@ class _FlipPageViewState extends State<FlipPageView> {
   Future<void> _retrieveMaxIndex() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.31.154:3000/maxIndex'),
+        Uri.parse('http://10.10.11.121:3000/maxIndex'),
         headers: {'Content-Type': 'application/json'},
       );
+
+      print("Max Index Response: ${response.body}"); // Debug print
 
       if (response.statusCode == 200) {
         final maxIndex = int.parse(response.body);
         rng = ReverseNumberGenerator(maxIndex - 1); // Initialize with max index
-        _fetchData(); // Fetch the first set of data
+        await _fetchData(); // Fetch the first set of data
       } else {
         print(
             "Failed to retrieve max index. Status code: ${response.statusCode}");
@@ -91,12 +93,16 @@ class _FlipPageViewState extends State<FlipPageView> {
     if (rng != null) {
       final int? currentIndex = rng!.generatePreviousNumber();
 
+      print("Current Index: $currentIndex"); // Debug print
+
       if (currentIndex != null) {
         final response = await http.post(
-          Uri.parse('http://192.168.31.154:3000/retreiveData'),
+          Uri.parse('http://10.10.11.121:3000/retreiveData'),
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
           body: jsonEncode({'index': currentIndex}),
         );
+
+        print("Fetch Data Response: ${response.body}"); // Debug print
 
         if (response.statusCode == 200) {
           final Map<String, dynamic> data = jsonDecode(response.body);
@@ -157,113 +163,55 @@ class _FlipPageViewState extends State<FlipPageView> {
         }
         double angle = pagePosition.clamp(-1, 1) * (3.14 / 2);
 
-        // Define a widget for folding the page top half with only title and image
-        Widget _buildTopHalf() {
-          return Transform(
-            alignment: Alignment.bottomCenter,
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001) // Perspective effect
-              ..rotateX(
-                  angle > 0 ? angle : 0), // Fold only in forward direction
-            child: ClipRect(
-              child: Align(
-                alignment: Alignment.topCenter,
-                heightFactor: 0.5,
-                child: Container(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        data.title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 25,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      data.mediaUrl.isNotEmpty
-                          ? Image.memory(
-                              base64Decode(data.mediaUrl),
-                              height: 200,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            )
-                          : const Text("No image available"),
-                    ],
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001) // Perspective effect
+            ..rotateX(pagePosition.clamp(-1, 1) * (3.14 / 2)), // Flip effect
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Display image
+                const SizedBox(
+                  height: 20,
+                ),
+                data.mediaUrl.isNotEmpty
+                    ? Image.memory(
+                        base64Decode(data.mediaUrl),
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      )
+                    : const Text("No image available"),
+                const SizedBox(height: 8),
+                // Display username
+                Text(
+                  data.username,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
                   ),
                 ),
-              ),
-            ),
-          );
-        }
-
-        // Define a widget for folding the page bottom half with rest of the details
-        Widget _buildBottomHalf() {
-          return Transform(
-            alignment: Alignment.topCenter,
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001) // Perspective effect
-              ..rotateX(
-                  angle < 0 ? angle : 0), // Fold only in backward direction
-            child: ClipRect(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                heightFactor: 0.5,
-                child: Container(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        data.username,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        data.caption,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ],
+                const SizedBox(height: 4),
+                // Display title
+                Text(
+                  data.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
                   ),
                 ),
-              ),
-            ),
-          );
-        }
-
-        return Stack(
-          children: [
-            // Render top half of the page
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: MediaQuery.of(context).size.height / 2,
-              child: _buildTopHalf(),
-            ),
-            // Render bottom half of the page
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: MediaQuery.of(context).size.height / 2,
-              child: _buildBottomHalf(),
-            ),
-            if (pagePosition.abs() < 1) // Add a crease line in the middle
-              Positioned(
-                top: MediaQuery.of(context).size.height / 2 - 1,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 2,
-                  color: Colors.black.withOpacity(0.5),
+                const SizedBox(height: 8),
+                // Display caption
+                Text(
+                  data.caption,
+                  style: const TextStyle(fontSize: 16),
                 ),
-              ),
-          ],
+              ],
+            ),
+          ),
         );
       },
     );

@@ -19,7 +19,7 @@ app.use(cors());
 
 const client = new MongoClient("mongodb+srv://peecharasavir:DLv37jsi391FY9MR@cluster0.jv90ftt.mongodb.net/?retryWrites=true&w=majority");
 
-let i=1;
+let i;
 let collection;
 let otpCollection;
 let dataCollection;

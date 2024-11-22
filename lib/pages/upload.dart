@@ -35,7 +35,7 @@ class _UploadPageState extends State<UploadPage> {
 
   Future<void> _uploadData() async {
     const String uploadUrl =
-        'http://10.10.11.121:3000/upload'; // Update with your backend URL
+        'http://192.168.31.154:3000/upload'; // Update with your backend URL
 
     try {
       final request = http.MultipartRequest('POST', Uri.parse(uploadUrl));
@@ -75,6 +75,7 @@ class _UploadPageState extends State<UploadPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {

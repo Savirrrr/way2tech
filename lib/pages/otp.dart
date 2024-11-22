@@ -76,8 +76,8 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
     try {
       final response = await http.post(
         Uri.parse(widget.isRegistration
-            ? 'http://10.10.11.121:3000/verifySignupOtp'
-            : 'http://10.10.11.121:3000/verifyForgotPasswordOtp'),
+            ? 'http://192.168.31.154:3000/verifySignupOtp'
+            : 'http://192.168.31.154:3000/verifyForgotPasswordOtp'),
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode(
             {'email': widget.email, 'username': widget.username, 'otp': otp}),
@@ -134,7 +134,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
 
       try {
         final response = await http.post(
-          Uri.parse('http://10.10.11.121:3000/forgotpwd'),
+          Uri.parse('http://192.168.31.154:3000/forgotpwd'),
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
           body: jsonEncode({'email': widget.email}),
         );

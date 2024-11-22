@@ -1,14 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:way2techv1/pages/account.dart';
 import 'package:way2techv1/pages/home.dart';
+import 'package:way2techv1/pages/tabswitch.dart';
 import 'package:way2techv1/pages/upload.dart';
 
-class Navbar extends StatelessWidget {
+class Navbar extends StatefulWidget {
   final String email;
   final VoidCallback? onHomeTapped;
 
   const Navbar({super.key, required this.email, this.onHomeTapped});
+
+  @override
+  State<Navbar> createState() => _NavbarState();
+}
+
+class _NavbarState extends State<Navbar> {
+  // Keep track of the selected index
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index, Widget targetPage) {
+    if (_selectedIndex != index) {
+      setState(() {
+        _selectedIndex = index;
+      });
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => targetPage),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,53 +40,40 @@ class Navbar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              icon: const Icon(Icons.home, color: Colors.black),
+              icon: Icon(
+                _selectedIndex == 0 ? Icons.home : Icons.home_outlined,
+                color: _selectedIndex == 0 ? Colors.black : Colors.black54,
+              ),
               onPressed: () {
-                if (onHomeTapped != null) {
-                  onHomeTapped!(); // Just refresh the home data without navigating
+                if (widget.onHomeTapped != null) {
+                  widget.onHomeTapped!();
                 }
-                // context.go('/home');
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => FlipPageView(email: email)),
-                );
-              },
-            ),
-            // IconButton(
-            //   icon: const Icon(Icons.explore, color: Colors.black),
-            //   onPressed: () {
-            //     context.go('/explore'); // Navigate to the explore page route
-            //   },
-            // ),
-            IconButton(
-              icon: const Icon(Icons.upload, color: Colors.black),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UploadPage(email: email),
-                  ),
-                );
+                _onItemTapped(0, FlipPageView(email: widget.email));
               },
             ),
             IconButton(
-              icon: const Icon(Icons.business, color: Colors.black),
-              onPressed: () {
-                context.go('/business'); // Navigate to the business page route
-              },
+              icon: Icon(
+                _selectedIndex == 1 ? Icons.upload : Icons.upload_outlined,
+                color: _selectedIndex == 1 ? Colors.black : Colors.black54,
+              ),
+              onPressed: () =>
+                  _onItemTapped(1, UploadPage(email: widget.email)),
             ),
             IconButton(
-              icon: const Icon(Icons.person, color: Colors.black),
-              onPressed: () {
-                // Navigate to AccountPage with email
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AccountPage(email: email),
-                  ),
-                );
-              },
+              icon: Icon(
+                _selectedIndex == 2 ? Icons.event : Icons.event_outlined,
+                color: _selectedIndex == 2 ? Colors.black : Colors.black54,
+              ),
+              onPressed: () =>
+                  _onItemTapped(2, TabSwitchingPage(email: widget.email)),
+            ),
+            IconButton(
+              icon: Icon(
+                _selectedIndex == 3 ? Icons.person : Icons.person_outline,
+                color: _selectedIndex == 3 ? Colors.black : Colors.black54,
+              ),
+              onPressed: () =>
+                  _onItemTapped(3, AccountPage(email: widget.email)),
             ),
           ],
         ),

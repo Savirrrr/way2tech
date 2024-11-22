@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:way2techv1/pages/nav_bar.dart';
 
 class TabSwitchingPage extends StatefulWidget {
   @override
+  final String email;
+  TabSwitchingPage({required this.email});
   _TabSwitchingPageState createState() => _TabSwitchingPageState();
 }
 
@@ -25,13 +28,25 @@ class _TabSwitchingPageState extends State<TabSwitchingPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Events and Opportunities'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: 'Events'),
-            Tab(text: 'Opportunities'),
-          ],
+        automaticallyImplyLeading: false, // Removes back arrow
+        titleSpacing: 0, // Removes extra padding at the title
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(48.0), // Height of the TabBar
+          child: TabBar(
+            controller: _tabController,
+            indicator: BoxDecoration(
+              color: Colors.grey[800], // Darker background for selected tab
+              borderRadius:
+                  BorderRadius.circular(4), // Optional: rounded corners
+            ),
+            labelColor: Colors.white, // Text color for selected tab
+            unselectedLabelColor:
+                Colors.white70, // Text color for unselected tabs
+            tabs: const [
+              Tab(text: 'Events'),
+              Tab(text: 'Opportunities'),
+            ],
+          ),
         ),
       ),
       body: TabBarView(
@@ -40,6 +55,9 @@ class _TabSwitchingPageState extends State<TabSwitchingPage>
           _buildEventsList(),
           _buildOpportunitiesList(),
         ],
+      ),
+      bottomNavigationBar: Navbar(
+        email: widget.email,
       ),
     );
   }
@@ -57,10 +75,10 @@ class _TabSwitchingPageState extends State<TabSwitchingPage>
                 height: 50,
                 color: Colors.grey,
               ),
-              title: Text('Beyond Tech 2.0'),
+              title: const Text('Beyond Tech 2.0'),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: const [
                   Text('27/11/2024 | 10AM - 5PM'),
                   Text('Microsoft, Hyderabad'),
                 ],
@@ -85,17 +103,17 @@ class _TabSwitchingPageState extends State<TabSwitchingPage>
                 height: 50,
                 color: Colors.grey,
               ),
-              title: Text('Web Dev Intern'),
+              title: const Text('Web Dev Intern'),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: const [
                   Text('Learn-x | Internship'),
                   Text('2.5k - 5k/month'),
                 ],
               ),
               trailing: ElevatedButton(
                 onPressed: () {},
-                child: Text('Apply'),
+                child: const Text('Apply'),
               ),
             ),
           ),

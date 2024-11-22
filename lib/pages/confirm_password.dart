@@ -101,7 +101,7 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.10.11.121:3000/resetpassword'),
+        Uri.parse('http://192.168.31.154:3000/resetpassword'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
         },

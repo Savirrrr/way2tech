@@ -9,6 +9,8 @@ const fs = require('fs');
 const { emit } = require('process');
 const path=require('path');
 const { log } = require('console');
+const Event=require('../models/Event');
+
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -24,7 +26,8 @@ let collection;
 let otpCollection;
 let dataCollection;
 let uploadCollection;
-let tempUploads = {}; 
+let tempUploads = {};
+let uploadOpportunity={}
 
 async function connectDB() {
     try {
@@ -208,7 +211,7 @@ app.get('/maxIndex', async (req, res) => {
       res.status(500).send('Internal server error');
     }
   });
-  
+
 
 //retreive uploaded data
 app.post('/retreiveData', async (req, res) => {
@@ -513,6 +516,30 @@ app.post("/updateprofileusername", async (req,res)=>{
     }
 
 });
+
+
+app.post('/uploadOpportunities', async (req, res) => {
+    const { title, description , link} = req.body;
+    const id=new ObjectId()
+    
+    uploadOpportunity[id]={
+        index:i,
+        title:title,
+        description:description,
+        link:link
+    }
+    i+=1;
+    try {
+        await sendApprovalEmail(tempId,caption, title,mediaData, mediaContentType, mediaOriginalName,email);
+        res.status(200).send('Email sent for approval');
+    } catch (err) {
+        console.error(`Error sending email: ${err}`);
+        res.status(500).send('Error sending email');
+    }
+});
+
+
+
 
 // Start the server
 async function startServer() {

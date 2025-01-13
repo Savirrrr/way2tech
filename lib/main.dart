@@ -25,9 +25,9 @@ class MyApp extends StatelessWidget {
       await prefs.setBool('isFirstRun', false);
       return '/onboarding';
     } else if (email != null && email.isNotEmpty) {
-      return '/home'; // Redirect to home if the user is already logged in
+      return '/home'; 
     } else {
-      return '/loginsignup'; // Redirect to login/signup if the user is not logged in
+      return '/loginsignup'; 
     }
   }
 

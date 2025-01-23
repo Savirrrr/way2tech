@@ -70,7 +70,7 @@ class _FlipPageViewState extends State<FlipPageView> {
   Future<void> _retrieveMaxIndex() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.31.154:3000/maxIndex'),
+        Uri.parse('http://localhost:3000/maxIndex'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -97,7 +97,7 @@ class _FlipPageViewState extends State<FlipPageView> {
 
       if (currentIndex != null) {
         final response = await http.post(
-          Uri.parse('http://192.168.31.154:3000/retreiveData'),
+          Uri.parse('http://localhost:3000/retreiveData'),
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
           body: jsonEncode({'index': currentIndex}),
         );

@@ -4,10 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:way2techv1/pages/Login_singup.dart';
 import 'package:way2techv1/pages/account.dart';
 import 'package:way2techv1/pages/confirm_password.dart';
+import 'package:way2techv1/pages/eventOpportunity.dart';
 import 'package:way2techv1/pages/forgot_password.dart';
-import 'pages/onboarding_screen.dart';
-import 'pages/home.dart';
-import 'pages/login_page.dart';
+import 'package:way2techv1/pages/onboarding_screen.dart';
+import 'package:way2techv1/pages/home.dart';
+import 'package:way2techv1/pages/login_page.dart';
+import 'package:way2techv1/pages/upload.dart';
+import 'package:way2techv1/pages/tabswitch.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,9 +28,9 @@ class MyApp extends StatelessWidget {
       await prefs.setBool('isFirstRun', false);
       return '/onboarding';
     } else if (email != null && email.isNotEmpty) {
-      return '/home'; 
+      return '/home';
     } else {
-      return '/loginsignup'; 
+      return '/loginsignup';
     }
   }
 
@@ -58,9 +61,29 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/home',
               builder: (context, state) {
-                final email = state.extra as String? ??
-                    ''; // Extract the email from the state
+                final email = state.uri.queryParameters['email'] ?? '';
                 return FlipPageView(email: email);
+              },
+            ),
+            GoRoute(
+              path: '/upload',
+              builder: (context, state) {
+                final email = state.uri.queryParameters['email'] ?? '';
+                return UploadPage(email: email);
+              },
+            ),
+            GoRoute(
+              path: '/tabswitch',
+              builder: (context, state) {
+                final email = state.uri.queryParameters['email'] ?? '';
+                return Eventopprotunities(email: email);
+              },
+            ),
+            GoRoute(
+              path: '/account',
+              builder: (context, state) {
+                final String email = state.extra as String; // Access the email from 'extra'
+    return AccountPage(email: email);
               },
             ),
             GoRoute(
@@ -70,14 +93,6 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/loginsignup',
               builder: (context, state) => const StartPage(),
-            ),
-            GoRoute(
-              path: '/account',
-              builder: (context, state) {
-                final email = state.extra as String? ??
-                    ''; // Extract the email from the state
-                return AccountPage(email: email);
-              },
             ),
             GoRoute(
               path: '/forgotpassword',

@@ -1,32 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:way2techv1/pages/nav_bar.dart';
 
-void main() {
-  runApp(const MyApp());
-}
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
+class Eventopprotunities extends StatefulWidget {
+  final String email;
+  Eventopprotunities({required this.email});
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'Inter',
-      ),
-      home: const HomePage(),
-    );
-  }
+  _EventopprotunitiesState createState() => _EventopprotunitiesState();
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
+class _EventopprotunitiesState extends State<Eventopprotunities> {
   bool showEvents = true;
 
   @override
@@ -107,6 +90,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+      bottomNavigationBar: Navbar(email: widget.email),
     );
   }
 }

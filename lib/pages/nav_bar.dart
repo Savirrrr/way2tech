@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:way2techv1/pages/account.dart';
-import 'package:way2techv1/pages/home.dart';
-import 'package:way2techv1/pages/tabswitch.dart';
-import 'package:way2techv1/pages/upload.dart';
+import 'package:go_router/go_router.dart';
 
 class Navbar extends StatefulWidget {
   final String email;
@@ -15,19 +12,36 @@ class Navbar extends StatefulWidget {
 }
 
 class _NavbarState extends State<Navbar> {
-  // Keep track of the selected index
   int _selectedIndex = 0;
 
-  void _onItemTapped(int index, Widget targetPage) {
-    if (_selectedIndex != index) {
-      setState(() {
-        _selectedIndex = index;
-      });
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => targetPage),
-      );
-    }
+  // This function now takes email as an argument and passes it to GoRouter's 'extra' parameter
+  void _onItemTapped(int index, String route) {
+  setState(() {
+    _selectedIndex = index;
+  });
+  if (route == '/account') {
+    context.go(route, extra: widget.email); // Pass email when navigating to account
+  } else {
+    context.go(route);
+  }
+}
+
+  // Function to build individual navigation items
+  Widget _buildNavItem(int index, IconData selectedIcon, IconData unselectedIcon, String route) {
+    final bool isSelected = _selectedIndex == index;
+    return IconButton(
+      icon: Icon(
+        isSelected ? selectedIcon : unselectedIcon,
+        color: isSelected ? Colors.black : Colors.grey,
+        size: 28.0,
+      ),
+      onPressed: () {
+        if (index == 0 && widget.onHomeTapped != null) {
+          widget.onHomeTapped!();
+        }
+        _onItemTapped(index, route); // Pass email and route
+      },
+    );
   }
 
   @override
@@ -35,46 +49,14 @@ class _NavbarState extends State<Navbar> {
     return BottomAppBar(
       color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0),
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(
-              icon: Icon(
-                _selectedIndex == 0 ? Icons.home : Icons.home_outlined,
-                color: _selectedIndex == 0 ? Colors.black : Colors.black54,
-              ),
-              onPressed: () {
-                if (widget.onHomeTapped != null) {
-                  widget.onHomeTapped!();
-                }
-                _onItemTapped(0, FlipPageView(email: widget.email));
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                _selectedIndex == 1 ? Icons.upload : Icons.upload_outlined,
-                color: _selectedIndex == 1 ? Colors.black : Colors.black54,
-              ),
-              onPressed: () =>
-                  _onItemTapped(1, UploadPage(email: widget.email)),
-            ),
-            IconButton(
-              icon: Icon(
-                _selectedIndex == 2 ? Icons.event : Icons.event_outlined,
-                color: _selectedIndex == 2 ? Colors.black : Colors.black54,
-              ),
-              onPressed: () =>
-                  _onItemTapped(2, TabSwitchingPage(email: widget.email)),
-            ),
-            IconButton(
-              icon: Icon(
-                _selectedIndex == 3 ? Icons.person : Icons.person_outline,
-                color: _selectedIndex == 3 ? Colors.black : Colors.black54,
-              ),
-              onPressed: () =>
-                  _onItemTapped(3, AccountPage(email: widget.email)),
-            ),
+            _buildNavItem(0, Icons.home, Icons.home_outlined, '/home'),
+            _buildNavItem(1, Icons.upload, Icons.upload_outlined, '/upload'),
+            _buildNavItem(2, Icons.event, Icons.event_outlined, '/tabswitch'),
+            _buildNavItem(3, Icons.person, Icons.person_outline, '/account'),
           ],
         ),
       ),

@@ -135,7 +135,7 @@ class _AccountPageState extends State<AccountPage> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: _logout, // Call the logout method
-                      child: Text('Log Out'),
+                      child: Text('Log Out',style: TextStyle(color: Colors.black,),),
                     ),
                   ),
                 ],

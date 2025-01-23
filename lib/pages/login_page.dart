@@ -48,7 +48,7 @@ class _LoginpageState extends State<Loginpage> {
 
     final response = await http.post(
       Uri.parse(
-          'http://192.168.31.154:3000/login'), // Replace with your backend URL
+          'http://localhost:3000/login'), // Replace with your backend URL
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

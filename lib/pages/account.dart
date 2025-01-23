@@ -124,7 +124,7 @@ class _AccountPageState extends State<AccountPage> {
                                       ),
                                     ),
                                     Text(
-                                      email ?? 'No email',
+                                      username ?? 'No username',
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: Colors.grey.shade600,

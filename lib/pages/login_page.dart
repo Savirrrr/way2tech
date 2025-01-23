@@ -46,7 +46,7 @@ class _LoginpageState extends State<Loginpage> {
       // Save email in SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('userEmail', email);
-
+      print("email stored in shared preferences:$email");
       // Navigate to home page and pass email
       context.go('/home', extra: email);
     } else {

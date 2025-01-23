@@ -61,31 +61,31 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/home',
               builder: (context, state) {
-                final email = state.uri.queryParameters['email'] ?? '';
+                final String email = state.extra as String? ?? '';
                 return FlipPageView(email: email);
               },
             ),
             GoRoute(
               path: '/upload',
               builder: (context, state) {
-                final email = state.uri.queryParameters['email'] ?? '';
+                final String email = state.extra as String? ?? '';
                 return UploadPage(email: email);
               },
             ),
             GoRoute(
               path: '/tabswitch',
               builder: (context, state) {
-                final email = state.uri.queryParameters['email'] ?? '';
+                final String email = state.extra as String? ?? '';
                 return Eventopprotunities(email: email);
               },
             ),
             GoRoute(
-  path: '/account',
-  builder: (context, state) {
-    final String email = state.extra as String; // Extract the email from 'extra'
-    return AccountPage(email: email); // Pass the email to AccountPage
-  },
-),
+              path: '/account',
+              builder: (context, state) {
+                final String email = state.extra as String? ?? '';
+                return AccountPage(email: email);
+              },
+            ),
             GoRoute(
               path: '/login',
               builder: (context, state) => const Loginpage(),
@@ -101,7 +101,7 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/resetpassword',
               builder: (context, state) {
-                final email = state.uri.queryParameters['email'] ?? '';
+                final String email = state.uri.queryParameters['email'] ?? '';
                 return ConfirmPasswordPage(email: email);
               },
             ),

@@ -400,7 +400,31 @@ app.post('/login', async (req, res) => {
         return res.status(500).send('Internal server error');
     }
 });
-
+app.post("/retrieveusername", async (req, res) => {
+    try {
+      const email = req.body.email;
+  
+      if (!email) {
+        return res.status(400).send({ message: "Email is required" });
+      }
+  
+      const user = await collection.findOne({ email });
+      console.log(user.firstname);
+      console.log(user.lastNnme);
+      if (user) {
+        res.status(200).send({
+          username: user.username,
+          firstName: user.firstname,
+          lastName: user.lastname,
+        });
+      } else {
+        res.status(404).send({ message: "User not found" });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).send({ message: "Internal Server Error" });
+    }
+  });
 
 // Handle forgot password
 app.post('/forgotpwd', async (req, res) => {

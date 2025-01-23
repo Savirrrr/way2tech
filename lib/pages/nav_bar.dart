@@ -13,20 +13,16 @@ class Navbar extends StatefulWidget {
 
 class _NavbarState extends State<Navbar> {
   int _selectedIndex = 0;
-
-  // This function now takes email as an argument and passes it to GoRouter's 'extra' parameter
   void _onItemTapped(int index, String route) {
   setState(() {
     _selectedIndex = index;
   });
   if (route == '/account') {
-    context.go(route, extra: widget.email); // Pass email when navigating to account
+    context.go(route, extra: widget.email); 
   } else {
-    context.go(route);
+    context.go(route); 
   }
 }
-
-  // Function to build individual navigation items
   Widget _buildNavItem(int index, IconData selectedIcon, IconData unselectedIcon, String route) {
     final bool isSelected = _selectedIndex == index;
     return IconButton(
@@ -39,7 +35,7 @@ class _NavbarState extends State<Navbar> {
         if (index == 0 && widget.onHomeTapped != null) {
           widget.onHomeTapped!();
         }
-        _onItemTapped(index, route); // Pass email and route
+        _onItemTapped(index, route);
       },
     );
   }

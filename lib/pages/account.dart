@@ -20,15 +20,13 @@ class _AccountPageState extends State<AccountPage> {
 
   Future<void> _logout() async {
     await clearUserEmail();
-    // Navigate to the login screen
-    context.go('/login'); // Use GoRouter to navigate to the login/signup screen
+    context.go('/login'); // Navigate to the login/signup screen
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // title: Center(child: Text("Account")),
         automaticallyImplyLeading: false,
       ),
       body: Padding(
@@ -62,8 +60,7 @@ class _AccountPageState extends State<AccountPage> {
                                 ),
                               ),
                               Text(
-                                widget
-                                    .email, // Display the email using widget.email
+                                widget.email, // Display the email using widget.email
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey.shade600,
@@ -134,8 +131,11 @@ class _AccountPageState extends State<AccountPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _logout, // Call the logout method
-                      child: Text('Log Out',style: TextStyle(color: Colors.black,),),
+                      onPressed: _logout,
+                      child: Text(
+                        'Log Out',
+                        style: TextStyle(color: Colors.black),
+                      ),
                     ),
                   ),
                 ],

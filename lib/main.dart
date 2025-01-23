@@ -80,12 +80,12 @@ class MyApp extends StatelessWidget {
               },
             ),
             GoRoute(
-              path: '/account',
-              builder: (context, state) {
-                final String email = state.extra as String; // Access the email from 'extra'
-    return AccountPage(email: email);
-              },
-            ),
+  path: '/account',
+  builder: (context, state) {
+    final String email = state.extra as String; // Extract the email from 'extra'
+    return AccountPage(email: email); // Pass the email to AccountPage
+  },
+),
             GoRoute(
               path: '/login',
               builder: (context, state) => const Loginpage(),

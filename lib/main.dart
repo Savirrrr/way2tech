@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:way2techv1/pages/Login_singup.dart';
-import 'package:way2techv1/pages/account.dart';
-import 'package:way2techv1/pages/confirm_password.dart';
 import 'package:way2techv1/pages/eventOpportunity.dart';
-import 'package:way2techv1/pages/forgot_password.dart';
-import 'package:way2techv1/pages/onboarding_screen.dart';
 import 'package:way2techv1/pages/home.dart';
-import 'package:way2techv1/pages/login_page.dart';
 import 'package:way2techv1/pages/upload.dart';
 import 'package:way2techv1/pages/tabswitch.dart';
+import 'package:way2techv1/pages/account.dart';
+import 'package:way2techv1/pages/onboarding_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -55,10 +52,6 @@ class MyApp extends StatelessWidget {
           initialLocation: initialRoute,
           routes: [
             GoRoute(
-              path: '/',
-              builder: (context, state) => const StartPage(),
-            ),
-            GoRoute(
               path: '/home',
               builder: (context, state) {
                 final String email = state.extra as String? ?? '';
@@ -87,36 +80,14 @@ class MyApp extends StatelessWidget {
               },
             ),
             GoRoute(
-              path: '/login',
-              builder: (context, state) => const Loginpage(),
-            ),
-            GoRoute(
               path: '/loginsignup',
               builder: (context, state) => const StartPage(),
-            ),
-            GoRoute(
-              path: '/forgotpassword',
-              builder: (context, state) => const ForgotPasswordPage(),
-            ),
-            GoRoute(
-              path: '/resetpassword',
-              builder: (context, state) {
-                final String email = state.uri.queryParameters['email'] ?? '';
-                return ConfirmPasswordPage(email: email);
-              },
             ),
             GoRoute(
               path: '/onboarding',
               builder: (context, state) => const OnboardingScreen(),
             ),
           ],
-          errorBuilder: (context, state) {
-            return Scaffold(
-              body: Center(
-                child: Text('Error: ${state.error}'),
-              ),
-            );
-          },
         );
 
         return MaterialApp.router(

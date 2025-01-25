@@ -20,16 +20,16 @@ class _NavbarState extends State<Navbar> {
     // Navigation logic based on index
     switch (index) {
       case 0:
-        context.go('/home'); // Navigate to Home
+        context.go('/home'); 
         break;
       case 1:
-        context.go('/upload'); // Navigate to Upload
+        context.go('/upload'); 
         break;
       case 2:
-        context.go('/tabswitch'); // Navigate to Events
+        context.go('/tabswitch'); 
         break;
       case 3:
-        context.go('/account', extra: widget.email); // Pass the email to the Account page
+        context.go('/account', extra: widget.email); 
         break;
     }
   }
@@ -40,14 +40,14 @@ class _NavbarState extends State<Navbar> {
 
     return GestureDetector(
       onTap: () {
-        _onItemTapped(index); // Handle taps with navigation
+        _onItemTapped(index); 
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             isSelected ? selectedIcon : unselectedIcon,
-            color: isSelected ? Colors.black : Colors.grey, // Black for selected
+            color: isSelected ? Colors.black : Colors.grey, 
             size: 28.0,
           ),
         ],

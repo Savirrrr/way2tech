@@ -7,8 +7,8 @@ const eventSchema = new mongoose.Schema({
     endDate: Date,
     registrationLink: String,
     image: String,
-    email: { type: String, required: true }, // New field to store the user's email
-    status: { type: String, default: 'Pending' }, // Possible values: 'Pending', 'Approved', 'Rejected'
+    email: { type: String, required: true },
+    status: { type: String, default: 'Pending' }, 
 });
 
 const Event = mongoose.model('Event', eventSchema);

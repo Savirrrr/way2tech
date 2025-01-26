@@ -81,13 +81,11 @@ const resetPassword = async (db, req, res) => {
     const { token, newPassword } = req.body;
 
     try {
-        // Find the reset token
         const resetRequest = await db.collection('password_resets').findOne({ token });
         if (!resetRequest || resetRequest.expiresAt < new Date()) {
             return res.status(400).json({ message: 'Token expired or invalid' });
         }
 
-        // Find the user and update password
         const user = await db.collection('users').findOne({ email: resetRequest.email });
         if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -97,7 +95,6 @@ const resetPassword = async (db, req, res) => {
             { $set: { password: hashedPassword } }
         );
 
-        // Delete the reset token after use
         await db.collection('password_resets').deleteOne({ token });
 
         res.status(200).json({ message: 'Password reset successfully' });
@@ -121,7 +118,6 @@ const verifySignupOtp = async (req, res) => {
             return res.status(401).send('Invalid or expired OTP');
         }
 
-        // Insert user data into the main collection
         const userData = {
             username,
             firstname: otpRecord.fname,

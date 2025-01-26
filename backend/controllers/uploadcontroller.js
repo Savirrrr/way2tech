@@ -1,6 +1,6 @@
-const UploadOpportunity = require('../models/upploadopportunity'); // Change media to uploadOpportunity
+const UploadOpportunity = require('../models/upploadopportunity'); 
 const { sendEmail } = require('../utils/emailUtils');
-let tempUploads = {}; // Temporary storage for pending uploads
+let tempUploads = {}; 
 
 exports.rejectUpload = (req, res) => {
     const tempId = req.params.tempId;
@@ -30,7 +30,7 @@ exports.saveEditedUpload = async (req, res) => {
         tempUploads[tempId].userId = userId;
 
         try {
-            await UploadOpportunity.insertOne(tempUploads[tempId]);  // Insert data into uploadOpportunity model
+            await UploadOpportunity.insertOne(tempUploads[tempId]);  
             delete tempUploads[tempId];
             res.send('Data saved to the database successfully');
         } catch (err) {

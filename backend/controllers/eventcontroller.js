@@ -1,4 +1,4 @@
-const Event = require('../models/Event'); // Importing Event model
+const Event = require('../models/Event'); 
 const nodemailer = require('nodemailer');
 
 const submitEvent = async (req, res) => {

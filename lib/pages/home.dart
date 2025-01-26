@@ -1,43 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:way2techv1/widget/navbar.dart';
-
-class UploadData {
-  final String title;
-  final String caption;
-  final String username;
-  final String mediaUrl;
-
-  UploadData({
-    required this.title,
-    required this.caption,
-    required this.username,
-    required this.mediaUrl,
-  });
-
-  factory UploadData.fromJson(Map<String, dynamic> json) {
-    return UploadData(
-      title: json['title'] ?? 'No Title',
-      caption: json['text'] ?? 'No Caption',
-      username: json['userId'] ?? 'Unknown User',
-      mediaUrl: json['media'] != null ? json['media']['data'] : '',
-    );
-  }
-}
-
-class ReverseNumberGenerator {
-  int _currentIndex;
-
-  ReverseNumberGenerator(this._currentIndex);
-
-  int? generatePreviousNumber() {
-    if (_currentIndex >= 0) {
-      return _currentIndex--;
-    }
-    return null;
-  }
-}
+import 'package:way2techv1/models/upload_model.dart';
+import 'package:way2techv1/service/api_service.dart';
+import 'package:way2techv1/widget/caught_up_page.dart';
+import 'package:way2techv1/widget/flip_page.dart';
+import '../widget/navbar.dart';
 
 class FlipPageView extends StatefulWidget {
   final String email;
@@ -49,7 +15,9 @@ class FlipPageView extends StatefulWidget {
 }
 
 class _FlipPageViewState extends State<FlipPageView> {
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
+  final ApiService _apiService = ApiService();
+
   List<UploadData> _pagesData = [];
   bool isLoading = true;
   ReverseNumberGenerator? rng;
@@ -57,30 +25,14 @@ class _FlipPageViewState extends State<FlipPageView> {
   @override
   void initState() {
     super.initState();
-    _loadInitialData(); // Load the initial page
+    _loadInitialData();
   }
 
   Future<void> _loadInitialData() async {
-    await _retrieveMaxIndex();
-  }
-
-  Future<void> _retrieveMaxIndex() async {
     try {
-      final response = await http.get(
-        Uri.parse('http://localhost:3000/maxIndex'),
-        headers: {'Content-Type': 'application/json'},
-      );
-
-      print("Max Index Response: ${response.body}"); // Debug print
-
-      if (response.statusCode == 200) {
-        final maxIndex = int.parse(response.body);
-        rng = ReverseNumberGenerator(maxIndex - 1); // Initialize with max index
-        await _fetchData(); // Fetch the first set of data
-      } else {
-        print(
-            "Failed to retrieve max index. Status code: ${response.statusCode}");
-      }
+      final maxIndex = await _apiService.retrieveMaxIndex();
+      rng = ReverseNumberGenerator(maxIndex - 1);
+      await _fetchData();
     } catch (e) {
       print("Error: $e");
     }
@@ -90,25 +42,17 @@ class _FlipPageViewState extends State<FlipPageView> {
     if (rng != null) {
       final int? currentIndex = rng!.generatePreviousNumber();
 
-      print("Current Index: $currentIndex"); // Debug print
-
       if (currentIndex != null) {
-        final response = await http.post(
-          Uri.parse('http://localhost:3000/retreiveData'),
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: jsonEncode({'index': currentIndex}),
-        );
-
-        print("Fetch Data Response: ${response.body}"); // Debug print
-
-        if (response.statusCode == 200) {
-          final Map<String, dynamic> data = jsonDecode(response.body);
-          setState(() {
-            _pagesData.add(UploadData.fromJson(data));
-            isLoading = false;
-          });
-        } else {
-          print("Failed to retrieve data. Status code: ${response.statusCode}");
+        try {
+          final data = await _apiService.fetchData(currentIndex);
+          if (data != null) {
+            setState(() {
+              _pagesData.add(data);
+              isLoading = false;
+            });
+          }
+        } catch (e) {
+          print("Error: $e");
           setState(() {
             isLoading = false;
           });
@@ -122,112 +66,30 @@ class _FlipPageViewState extends State<FlipPageView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: CustomAppBar(),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : _pagesData.isNotEmpty
               ? PageView.builder(
                   controller: _pageController,
-                  itemCount: _pagesData.length + 1, // +1 for "caught up" page
+                  itemCount: _pagesData.length + 1,
                   itemBuilder: (context, index) {
                     if (index < _pagesData.length) {
-                      return _buildFlipPage(_pagesData[index], index);
+                      return FlipPage(data: _pagesData[index]);
                     } else {
-                      return _buildCaughtUpPage();
+                      return const CaughtUpPage();
                     }
                   },
                   onPageChanged: (index) {
                     if (index == _pagesData.length - 1) {
-                      _fetchData(); // Load next page data when scrolled to last page
+                      _fetchData();
                     }
                   },
-                  scrollDirection: Axis.vertical, // Vertical page scrolling
+                  scrollDirection: Axis.vertical,
                 )
               : const Center(
                   child: Text("No data retrieved yet."),
                 ),
       bottomNavigationBar: Navbar(email: widget.email),
-    );
-  }
-
-  Widget _buildFlipPage(UploadData data, int index) {
-    return AnimatedBuilder(
-      animation: _pageController,
-      builder: (context, child) {
-        double pagePosition = 0;
-        if (_pageController.position.hasContentDimensions) {
-          pagePosition = _pageController.page! - index;
-        }
-        // double angle = pagePosition.clamp(-1, 1) * (3.14 / 2);
-
-        return Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001) // Perspective effect
-            ..rotateX(pagePosition.clamp(-1, 1) * (3.14 / 2)), // Flip effect
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Display image
-                const SizedBox(
-                  height: 20,
-                ),
-                data.mediaUrl.isNotEmpty
-                    ? Image.memory(
-                        base64Decode(data.mediaUrl),
-                        height: 200,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      )
-                    : const Text("No image available"),
-                const SizedBox(height: 8),
-                // Display username
-                Text(
-                  data.username,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                // Display title
-                Text(
-                  data.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Display caption
-                Text(
-                  data.caption,
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildCaughtUpPage() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          "You're all caught up!",
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            color: Colors.green,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
     );
   }
 }

@@ -1,12 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:way2techv1/service/upload_service.dart';
+import 'package:way2techv1/widget/upload_form.dart';
 import 'package:way2techv1/widget/navbar.dart';
 
 class UploadPage extends StatefulWidget {
   final String email;
-  UploadPage({required this.email});
+
+  const UploadPage({Key? key, required this.email}) : super(key: key);
+
   @override
   _UploadPageState createState() => _UploadPageState();
 }
@@ -31,40 +34,25 @@ class _UploadPageState extends State<UploadPage> {
   }
 
   Future<void> _uploadData() async {
-    const String uploadUrl =
-        'http://localhost:3000/upload'; // Update with your backend URL
+    final success = await UploadService.uploadData(
+      email: widget.email,
+      title: titleController.text,
+      caption: captionController.text,
+      mediaFile: _imageFile,
+    );
 
-    try {
-      final request = http.MultipartRequest('POST', Uri.parse(uploadUrl));
-      request.fields['title'] = titleController.text;
-      request.fields['caption'] = captionController.text;
-      request.fields['email'] = widget.email;
-      // request.fields['userId'] = 'your_user_id'; // Replace with actual userId
+    final snackBar = SnackBar(
+      content: Text(success ? 'Upload successful' : 'Upload failed'),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
-      if (_imageFile != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'media',
-            _imageFile!.path,
-          ),
-        );
-      }
-
-      final response = await request.send();
-
-      if (response.statusCode == 200) {
-        print('Data uploaded successfully');
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Upload successful')));
-      } else {
-        print('Failed to upload data: ${response.statusCode}');
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Upload failed')));
-      }
-    } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('An error occurred')));
+    if (success) {
+      titleController.clear();
+      captionController.clear();
+      setState(() {
+        _imageFile = null;
+        acceptTerms = false;
+      });
     }
   }
 
@@ -74,7 +62,7 @@ class _UploadPageState extends State<UploadPage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -85,90 +73,18 @@ class _UploadPageState extends State<UploadPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "TITLE:",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                controller: titleController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'text box',
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                "Caption:",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                controller: captionController,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'text box',
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                "Attach file: (mp4/jpg)",
-                style: TextStyle(fontSize: 14),
-              ),
-              SizedBox(height: 8),
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  height: 150,
-                  width: double.infinity,
-                  color: Colors.grey[300],
-                  child: _imageFile == null
-                      ? Center(
-                          child: Text("PREVIEW MEDIA",
-                              style: TextStyle(color: Colors.black54)))
-                      : Image.file(_imageFile!, fit: BoxFit.cover),
-                ),
-              ),
-              SizedBox(height: 16),
-              Row(
-                children: [
-                  Checkbox(
-                    value: acceptTerms,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        acceptTerms = value ?? false;
-                      });
-                    },
-                  ),
-                  Expanded(
-                    child: Text(
-                      "I hereby accept that this news is 100% true",
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              Center(
-                child: ElevatedButton(
-                  onPressed: acceptTerms ? _uploadData : null,
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    backgroundColor: Colors.black,
-                  ),
-                  child: Text(
-                    "UPLOAD NOW",
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          child: UploadForm(
+            titleController: titleController,
+            captionController: captionController,
+            imageFile: _imageFile,
+            acceptTerms: acceptTerms,
+            onPickImage: _pickImage,
+            onAcceptTerms: (value) {
+              setState(() {
+                acceptTerms = value ?? false;
+              });
+            },
+            onUpload: _uploadData,
           ),
         ),
       ),
@@ -176,4 +92,3 @@ class _UploadPageState extends State<UploadPage> {
     );
   }
 }
-

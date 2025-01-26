@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:typed_data';
-import 'package:way2techv1/widget/navbar.dart'; // For handling base64 data
+import 'package:way2techv1/widget/navbar.dart';
 
 class UploadData {
   final String title;
@@ -159,7 +158,7 @@ class _FlipPageViewState extends State<FlipPageView> {
         if (_pageController.position.hasContentDimensions) {
           pagePosition = _pageController.page! - index;
         }
-        double angle = pagePosition.clamp(-1, 1) * (3.14 / 2);
+        // double angle = pagePosition.clamp(-1, 1) * (3.14 / 2);
 
         return Transform(
           alignment: Alignment.center,

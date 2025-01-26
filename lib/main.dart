@@ -4,9 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:way2techv1/pages/Login_singup.dart';
 import 'package:way2techv1/pages/eventOpportunity.dart';
 import 'package:way2techv1/pages/home.dart';
+import 'package:way2techv1/pages/login_page.dart';
 import 'package:way2techv1/pages/upload.dart';
-import 'package:way2techv1/pages/tabswitch.dart';
-import 'package:way2techv1/pages/account.dart';
+import 'package:way2techv1/pages/account_page.dart';
 import 'package:way2techv1/pages/onboarding_screen.dart';
 
 void main() {
@@ -54,28 +54,28 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/home',
               builder: (context, state) {
-                final String email = state.extra as String? ?? '';
+                final email = state.uri.queryParameters['email'] ?? '';
                 return FlipPageView(email: email);
               },
             ),
             GoRoute(
               path: '/upload',
               builder: (context, state) {
-                final String email = state.extra as String? ?? '';
+                final email = state.uri.queryParameters['email'] ?? '';
                 return UploadPage(email: email);
               },
             ),
             GoRoute(
               path: '/tabswitch',
               builder: (context, state) {
-                final String email = state.extra as String? ?? '';
+                final email = state.uri.queryParameters['email'] ?? '';
                 return Eventopprotunities(email: email);
               },
             ),
             GoRoute(
               path: '/account',
               builder: (context, state) {
-                final String email = state.extra as String? ?? '';
+                final email = state.uri.queryParameters['email'] ?? '';
                 return AccountPage(email: email);
               },
             ),
@@ -87,6 +87,7 @@ class MyApp extends StatelessWidget {
               path: '/onboarding',
               builder: (context, state) => const OnboardingScreen(),
             ),
+            GoRoute(path: '/login',builder: (context, state) => const Loginpage(),)
           ],
         );
 

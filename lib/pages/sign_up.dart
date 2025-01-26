@@ -1,8 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:password_strength/password_strength.dart';
-import 'package:http/http.dart' as http;
 import 'package:way2techv1/pages/login_page.dart';
+import 'package:way2techv1/service/auth_service.dart';
 import 'package:way2techv1/pages/otp.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -24,6 +23,8 @@ class _SignUpPageState extends State<SignUpPage> {
   Color _passwordStrengthColor = Colors.red;
   String _usernameError = "";
 
+  final AuthService _authService = AuthService(); // Instantiate the service
+
   void _checkPasswordStrength(String password) {
     double strength = estimatePasswordStrength(password);
 
@@ -41,19 +42,6 @@ class _SignUpPageState extends State<SignUpPage> {
     setState(() {});
   }
 
-  Future<bool> _isUsernameTaken(String username) async {
-    var response = await http.get(
-      Uri.parse('http://localhost:3000/check-username/$username'),
-    );
-
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      return data['isTaken'];
-    } else {
-      throw Exception('Failed to check username');
-    }
-  }
-
   Future<void> _handleSignUp() async {
     String username = _usernameController.text;
     String firstName = _firstNameController.text;
@@ -61,7 +49,7 @@ class _SignUpPageState extends State<SignUpPage> {
     String email = _emailController.text;
     String password = _passwordController.text;
     String confirmPassword = _confirmPasswordController.text;
-    print("*****************************************" + username);
+
     if (username.isEmpty || firstName.isEmpty || lastName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all the fields')),
@@ -76,34 +64,21 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
-    bool usernameTaken = await _isUsernameTaken(username);
-    if (usernameTaken) {
-      setState(() {
-        _usernameError = 'Username is already taken';
-      });
-      return;
-    } else {
-      setState(() {
-        _usernameError = '';
-      });
-    }
-
     try {
-      var response = await http.post(
-        Uri.parse('http://localhost:3000/signup'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'username': username,
-          'firstName': firstName,
-          'lastName': lastName,
-          'email': email,
-          'password': password,
-        }),
-      );
+      bool usernameTaken = await _authService.isUsernameTaken(username);
+      if (usernameTaken) {
+        setState(() {
+          _usernameError = 'Username is already taken';
+        });
+        return;
+      } else {
+        setState(() {
+          _usernameError = '';
+        });
+      }
 
-      if (response.statusCode == 200) {
+      bool success = await _authService.signUpUser(username, firstName, lastName, email, password);
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text('Sign-Up Successful. Please verify your email.')),
@@ -119,7 +94,7 @@ class _SignUpPageState extends State<SignUpPage> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign-Up Failed: ${response.body}')),
+          const SnackBar(content: Text('Sign-Up Failed')),
         );
       }
     } catch (e) {
@@ -160,8 +135,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     filled: true,
                     fillColor: Colors.white,
                     hintText: 'Enter your username',
-                    errorText:
-                        _usernameError.isNotEmpty ? _usernameError : null,
+                    errorText: _usernameError.isNotEmpty ? _usernameError : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide.none,
@@ -235,10 +209,11 @@ class _SignUpPageState extends State<SignUpPage> {
                 child: Text("Password"),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 10.0, bottom: 4.0),
+                padding: const EdgeInsets.only(left: 15.0, bottom: 4.0),
                 child: TextField(
                   controller: _passwordController,
                   obscureText: true,
+                  onChanged: _checkPasswordStrength,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
@@ -248,42 +223,40 @@ class _SignUpPageState extends State<SignUpPage> {
                       borderSide: BorderSide.none,
                     ),
                   ),
-                  onChanged: _checkPasswordStrength,
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 15.0, top: 5),
-                child: Text(
-                  _passwordStrengthMessage,
-                  style: TextStyle(
-                    color: _passwordStrengthColor,
-                    fontWeight: FontWeight.bold,
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: Row(
+                  children: [
+                    Text(
+                      _passwordStrengthMessage,
+                      style: TextStyle(color: _passwordStrengthColor),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 10),
               const Padding(
                 padding: EdgeInsets.only(left: 15.0, bottom: 4.0),
                 child: Text("Confirm Password"),
               ),
               Padding(
-                  padding: const EdgeInsets.only(left: 10.0, bottom: 4.0),
-                  child: SizedBox(
-                    width: 300,
-                    child: TextField(
-                      controller: _confirmPasswordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: 'Confirm your password',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
+                padding: const EdgeInsets.only(left: 15.0, bottom: 4.0),
+                child: TextField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: 'Confirm your password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide.none,
                     ),
-                  )),
+                  ),
+                ),
+              ),
               const SizedBox(height: 20),
               Center(
                 child: ElevatedButton(

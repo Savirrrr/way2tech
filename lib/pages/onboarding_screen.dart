@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // Import GoRouter
+import 'package:way2techv1/widget/black_curve_painter.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -38,8 +39,7 @@ class OnboardingScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors
-                              .black, // Ensure text is readable on the black background
+                          color: Colors.black, // Ensure text is readable on the black background
                         ),
                       ),
                       SizedBox(height: 10),
@@ -48,8 +48,7 @@ class OnboardingScreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,
-                          color:
-                              Colors.black, // Lighter grey for better contrast
+                          color: Colors.black, // Lighter grey for better contrast
                         ),
                       ),
                       SizedBox(height: 20),
@@ -75,28 +74,5 @@ class OnboardingScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class BlackCurvePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.fill;
-
-    var path = Path();
-    path.moveTo(0, 0); // Start from top-left
-    path.quadraticBezierTo(
-        size.width / 2, size.height, size.width, 0); // Curve path to top-right
-    path.lineTo(size.width, 0); // Line to top-right
-    path.lineTo(0, 0.6); // Line back to the start to close path
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
   }
 }

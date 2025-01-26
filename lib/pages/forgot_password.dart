@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:way2techv1/service/auth_service.dart';
 import 'package:way2techv1/pages/otp.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -12,7 +13,7 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
-  bool isLoading = false; // To manage loading state
+  bool isLoading = false;
 
   Future<void> _forgotpwd() async {
     String email = _emailController.text;
@@ -21,19 +22,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       isLoading = true;
     });
 
-    final response = await http.post(
-      Uri.parse('http://localhost:3000/forgotpwd'),
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({'email': email}),
-    );
+    final isSuccessful = await AuthService().forgotPassword(email);
 
     setState(() {
       isLoading = false;
     });
 
-    if (response.statusCode == 200) {
+    if (isSuccessful) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP sent to email!')),
       );

@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
-import 'package:way2techv1/main.dart';
+import 'package:way2techv1/service/auth_service.dart';
 
 class ConfirmPasswordPage extends StatefulWidget {
   final String email;
@@ -15,8 +14,7 @@ class ConfirmPasswordPage extends StatefulWidget {
 
 class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
   bool isLoading = false;
   String? errorMessage;
 
@@ -91,6 +89,7 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
       errorMessage = null;
     });
 
+    // Check if passwords match
     if (passwordController.text != confirmPasswordController.text) {
       setState(() {
         errorMessage = "Passwords do not match!";
@@ -100,26 +99,14 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
     }
 
     try {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/resetpassword'),
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode({
-          'email': widget.email,
-          'newPassword': passwordController.text,
-        }),
-      );
+      final response = await AuthService.resetPassword(widget.email, passwordController.text);
 
-      if (response.statusCode == 200) {
+      if (response == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Password updated successfully!'),
           ),
         );
-
-        // Navigate to login page after showing the snackbar
-        // Navigator.pushReplacementNamed(context, '/login');
         context.go('/login');
       } else {
         setState(() {

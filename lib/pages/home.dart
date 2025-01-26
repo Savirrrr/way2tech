@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:typed_data';
-
-import 'package:way2techv1/pages/app_bar.dart';
-import 'package:way2techv1/pages/nav_bar.dart'; // For handling base64 data
+import 'package:way2techv1/widget/navbar.dart'; // For handling base64 data
 
 class UploadData {
   final String title;

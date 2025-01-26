@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:way2techv1/pages/nav_bar.dart';
+import 'package:way2techv1/widget/navbar.dart';
 
 class TabSwitchingPage extends StatefulWidget {
   @override

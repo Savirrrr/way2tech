@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:way2techv1/models/user_model.dart';
-import 'package:way2techv1/pages/nav_bar.dart';
 import 'package:way2techv1/service/user_service.dart';
 import 'package:way2techv1/widget/logout_button.dart';
+import 'package:way2techv1/widget/navbar.dart';
 import 'package:way2techv1/widget/profile_card.dart';
 import 'package:go_router/go_router.dart';
 
@@ -30,33 +30,34 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> loadEmailAndUserDetails() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userEmail = prefs.getString('userEmail');
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userEmail = prefs.getString('userEmail');
 
-    if (userEmail != null) {
-      try {
-        UserModel userDetails = await retrieveUserDetails(userEmail);
-
-        setState(() {
-          email = userEmail;
-          username = userDetails.username;
-          fullName = "${userDetails.firstName} ${userDetails.lastName}";
-        });
-      } catch (e) {
-        setState(() {
-          email = userEmail;
-          username = "Unknown User";
-          fullName = "Unknown User";
-        });
-      }
-    } else {
+  if (userEmail != null) {
+    try {
+      UserModel userDetails = await retrieveUserDetails(userEmail);
       setState(() {
-        email = null;
+        email = userEmail;
+        username = userDetails.username;
+        fullName = "${userDetails.firstName} ${userDetails.lastName}";
+      });
+    } catch (e, stackTrace) {
+      print("Error loading user details: $e");
+      print(stackTrace);
+      setState(() {
+        email = userEmail;
         username = "Unknown User";
         fullName = "Unknown User";
       });
     }
+  } else {
+    setState(() {
+      email = null;
+      username = "Unknown User";
+      fullName = "Unknown User";
+    });
   }
+}
 
   Future<void> clearUserEmail() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

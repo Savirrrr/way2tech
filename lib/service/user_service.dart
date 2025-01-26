@@ -15,11 +15,14 @@ Future<UserModel> retrieveUserDetails(String email) async {
     );
 
     if (response.statusCode == 200) {
-      return UserModel.fromJson(json.decode(response.body));
+      print("Response Body: ${response.body}");
+      final data = json.decode(response.body);
+      return UserModel.fromJson(data);
     } else {
-      throw Exception("Error retrieving user details");
+      throw Exception("Error retrieving user details: ${response.statusCode}");
     }
   } catch (e) {
+    print("Exception in API call: $e");
     throw Exception("Failed to connect to API");
   }
 }

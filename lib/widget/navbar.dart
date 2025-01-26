@@ -50,6 +50,7 @@ class _NavbarState extends State<Navbar> {
             color: isSelected ? Colors.black : Colors.grey, 
             size: 28.0,
           ),
+          const SizedBox(height: 4),
         ],
       ),
     );

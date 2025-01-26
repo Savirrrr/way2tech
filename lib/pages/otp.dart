@@ -1,16 +1,14 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+import 'package:way2techv1/service/otp_service.dart';
 import 'package:way2techv1/pages/confirm_password.dart';
 import 'login_page.dart'; // Import the Login page
 
 class OTPVerificationPage extends StatefulWidget {
   final String email;
   final bool isRegistration;
-
-  final String username; // Pass this parameter to decide redirection
+  final String username;
 
   OTPVerificationPage(
       {required this.email,
@@ -28,13 +26,22 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
   int remainingTime = 60; // Initial countdown time in seconds
   bool isResendEnabled = false;
   Timer? _timer;
+  final OTPService otpService = OTPService(); // Initialize the OTPService
 
   @override
   void initState() {
     super.initState();
     otpControllers = List.generate(otpLength, (_) => TextEditingController());
     focusNodes = List.generate(otpLength, (_) => FocusNode());
-    startResendTimer();
+    _timer = otpService.startResendTimer(remainingTime, (time) {
+      setState(() {
+        remainingTime = time;
+      });
+    }, () {
+      setState(() {
+        isResendEnabled = true;
+      });
+    });
   }
 
   @override
@@ -49,21 +56,6 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
     super.dispose();
   }
 
-  void startResendTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (remainingTime > 0) {
-        setState(() {
-          remainingTime--;
-        });
-      } else {
-        setState(() {
-          isResendEnabled = true;
-        });
-        timer.cancel();
-      }
-    });
-  }
-
   String formatTime(int seconds) {
     final minutes = (seconds / 60).floor();
     final remainingSeconds = seconds % 60;
@@ -73,43 +65,29 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
   Future<void> verifyOTP() async {
     String otp = otpControllers.map((controller) => controller.text).join();
 
-    try {
-      final response = await http.post(
-        Uri.parse(widget.isRegistration
-            ? 'http://localhost:3000/verifySignupOtp'
-            : 'http://localhost:3000/verifyForgotPasswordOtp'),
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode(
-            {'email': widget.email, 'username': widget.username, 'otp': otp}),
+    bool success = await otpService.verifyOTP(widget.email, widget.username, otp, widget.isRegistration);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('OTP verified successfully!')),
       );
 
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('OTP verified successfully!')),
+      // Conditional Navigation based on the context
+      if (widget.isRegistration) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Loginpage()),
         );
-
-        // Conditional Navigation based on the context
-        if (widget.isRegistration) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => Loginpage()),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ConfirmPasswordPage(email: widget.email)),
-          );
-        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid or expired OTP')),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ConfirmPasswordPage(email: widget.email)),
         );
       }
-    } catch (e) {
-      print('Error verifying OTP: $e');
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error verifying OTP')),
+        const SnackBar(content: Text('Invalid or expired OTP')),
       );
     }
   }
@@ -124,7 +102,15 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
         remainingTime = 60;
         isResendEnabled = false;
         _timer?.cancel();
-        startResendTimer();
+        _timer = otpService.startResendTimer(remainingTime, (time) {
+          setState(() {
+            remainingTime = time;
+          });
+        }, () {
+          setState(() {
+            isResendEnabled = true;
+          });
+        });
       });
 
       // Clear OTP inputs
@@ -132,26 +118,15 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
         controller.clear();
       }
 
-      try {
-        final response = await http.post(
-          Uri.parse('http://localhost:3000/forgotpwd'),
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: jsonEncode({'email': widget.email}),
-        );
+      bool success = await otpService.resendOTP(widget.email);
 
-        if (response.statusCode == 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('OTP resent to your email!')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to resend OTP')),
-          );
-        }
-      } catch (e) {
-        print('Error resending OTP: $e');
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error resending OTP')),
+          const SnackBar(content: Text('OTP resent to your email!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to resend OTP')),
         );
       }
     }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:way2techv1/pages/nav_bar.dart';
-
+import 'package:way2techv1/widget/event_card.dart';
+import 'package:way2techv1/widget/navbar.dart';
+import 'package:way2techv1/widget/opportunity_card.dart';
 
 class Eventopprotunities extends StatefulWidget {
   final String email;
-  Eventopprotunities({required this.email});
+  const Eventopprotunities({required this.email});
+
   @override
   _EventopprotunitiesState createState() => _EventopprotunitiesState();
 }
@@ -40,8 +42,7 @@ class _EventopprotunitiesState extends State<Eventopprotunities> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            color:
-                                showEvents ? Colors.blue.shade50 : Colors.white,
+                            color: showEvents ? Colors.blue.shade50 : Colors.white,
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: Text(
@@ -61,9 +62,7 @@ class _EventopprotunitiesState extends State<Eventopprotunities> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            color: !showEvents
-                                ? Colors.blue.shade50
-                                : Colors.white,
+                            color: !showEvents ? Colors.blue.shade50 : Colors.white,
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: Text(
@@ -81,8 +80,6 @@ class _EventopprotunitiesState extends State<Eventopprotunities> {
                 ),
               ),
             ),
-
-            // Content
             Expanded(
               child:
                   showEvents ? const EventsList() : const OpportunitiesList(),
@@ -104,7 +101,7 @@ class EventsList extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       itemCount: 5,
       itemBuilder: (context, index) {
-        return EventCard(
+        return const EventCard(
           title: 'Beyond Tech 2.0',
           date: '27/11/2024',
           time: '10AM - 5PM',
@@ -125,7 +122,7 @@ class OpportunitiesList extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       itemCount: 5,
       itemBuilder: (context, index) {
-        return OpportunityCard(
+        return const OpportunityCard(
           title: 'Software Engineer',
           company: 'Microsoft',
           location: 'Hyderabad',
@@ -134,258 +131,6 @@ class OpportunitiesList extends StatelessWidget {
           imageUrl: 'https://example.com/company-logo.jpg',
         );
       },
-    );
-  }
-}
-
-class EventCard extends StatelessWidget {
-  final String title;
-  final String date;
-  final String time;
-  final String location;
-  final String imageUrl;
-
-  const EventCard({
-    Key? key,
-    required this.title,
-    required this.date,
-    required this.time,
-    required this.location,
-    required this.imageUrl,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: [Colors.purple.shade50, Colors.blue.shade50],
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(2),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  bottomLeft: Radius.circular(15),
-                ),
-                child: Image.network(
-                  imageUrl,
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 100,
-                      height: 100,
-                      color: Colors.grey.shade200,
-                      child: const Icon(Icons.image),
-                    );
-                  },
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$date • $time',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 16,
-                            color: Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            location,
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.favorite_border),
-                onPressed: () {},
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class OpportunityCard extends StatelessWidget {
-  final String title;
-  final String company;
-  final String location;
-  final String jobType;
-  final String stipend;
-  final String imageUrl;
-
-  const OpportunityCard({
-    Key? key,
-    required this.title,
-    required this.company,
-    required this.location,
-    required this.jobType,
-    required this.stipend,
-    required this.imageUrl,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: [Colors.purple.shade50, Colors.blue.shade50],
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(2),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  bottomLeft: Radius.circular(15),
-                ),
-                child: Image.network(
-                  imageUrl,
-                  width: 100,
-                  height: 120,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 100,
-                      height: 120,
-                      color: Colors.grey.shade200,
-                      child: const Icon(Icons.business),
-                    );
-                  },
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        company,
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 16,
-                            color: Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            location,
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              jobType,
-                              style: TextStyle(
-                                color: Colors.blue.shade700,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            stipend,
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.favorite_border),
-                onPressed: () {},
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

@@ -7,7 +7,6 @@ import 'package:way2techv1/widget/navbar.dart';
 class UploadPage extends StatefulWidget {
   final String email;
   UploadPage({required this.email});
-
   @override
   _UploadPageState createState() => _UploadPageState();
 }

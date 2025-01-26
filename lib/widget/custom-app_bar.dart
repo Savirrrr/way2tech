@@ -1,5 +1,3 @@
-// lib/widgets/custom_app_bar.dart
-
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -32,7 +30,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             child: Row(
-              children: [
+              children: const [
                 Text('REFER NOW'),
                 Icon(Icons.arrow_forward), // No space after the icon
               ],

@@ -7,4 +7,6 @@ const eventSchema = new mongoose.Schema({
     status: { type: String, default: 'Pending' }
 });
 
-module.exports = mongoose.model('Event', eventSchema);
+const Event = mongoose.models.Event || mongoose.model('Event', opportunitySchema);
+
+module.exports = Event;

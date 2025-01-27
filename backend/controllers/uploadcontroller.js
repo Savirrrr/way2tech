@@ -1,5 +1,5 @@
-const UploadOpportunity = require('../models/upploadopportunity'); 
-const { sendEmail } = require('../utils/emailUtils');
+const UploadOpportunity = require('../models/opportunity'); 
+const { sendEmail } = require('../utils/email');
 let tempUploads = {}; 
 
 exports.rejectUpload = (req, res) => {

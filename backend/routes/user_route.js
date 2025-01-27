@@ -8,10 +8,10 @@ router.get('/profile', async (req, res) => {
     const db = await connectDB();
     getUserProfile(db, req, res);
 });
-router.get('/reject/:tempId', rejectUpload);
+// router.get('/reject/:tempId', rejectUpload);
 
-router.get('/edit/:tempId', editUpload);
+// router.get('/edit/:tempId', editUpload);
 
-router.post('/edit/:tempId', saveEditedUpload);
+// router.post('/edit/:tempId', saveEditedUpload);
 
 module.exports = router;

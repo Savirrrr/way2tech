@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const sendEmail = require('../utils/emailService');
+const sendEmail = require('../utils/email');
 const PasswordReset = require('../models/passwordreset');
 
 const saltRounds = 10;

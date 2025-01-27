@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:way2techv1/models/user_model.dart';
 
 Future<UserModel> retrieveUserDetails(String email) async {
-  final url = Uri.parse('http://localhost:3000/retrieveusername');
+  final url = Uri.parse('http://localhost:3000/api/user/profile');
 
   try {
     final response = await http.post(

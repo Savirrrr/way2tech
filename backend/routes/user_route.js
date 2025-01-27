@@ -1,6 +1,6 @@
 const express = require('express');
 const { getUserProfile } = require('../controllers/usercontroller');
-const connectDB = require('../utils/db');
+const {connectDB} = require('../utils/db');
 
 const router = express.Router();
 

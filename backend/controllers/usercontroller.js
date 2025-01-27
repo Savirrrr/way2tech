@@ -8,4 +8,5 @@ const getUserProfile = async (db, req, res) => {
     }
 };
 
+
 module.exports = { getUserProfile };

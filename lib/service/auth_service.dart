@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthService {
   static const String _baseUrl = 'http://localhost:3000/api/auth';
 
-  // Login function
   Future<bool> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('$_baseUrl/login'),
@@ -19,7 +18,6 @@ class AuthService {
     );
 
     if (response.statusCode == 200) {
-      // Save email to SharedPreferences on successful login
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('userEmail', email);
       return true;
@@ -28,13 +26,11 @@ class AuthService {
     }
   }
 
-  // Check if the user is already logged in
   Future<String?> getLoggedInUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('userEmail');
   }
 
-  // Logout function
   Future<void> logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('userEmail');
@@ -73,11 +69,10 @@ class AuthService {
     }
   }
   
-  // Check if the username is already taken
   Future<bool> isUsernameTaken(String username) async {
     try {
       var response = await http.get(
-        Uri.parse('$_baseUrl/check-username/$username'),
+        Uri.parse('http://localhost:3000/api/user/profile'),
       );
 
       if (response.statusCode == 200) {
@@ -91,7 +86,6 @@ class AuthService {
     }
   }
 
-  // Sign up the user
   Future<bool> signUpUser(String username, String firstName, String lastName, String email, String password) async {
     try {
       var response = await http.post(

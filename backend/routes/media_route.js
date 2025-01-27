@@ -1,6 +1,6 @@
 const express = require('express');
 const { uploadMedia, getMedia } = require('../controllers/mediacontroller');
-const connectDB = require('../utils/db');
+const {connectDB} = require('../utils/db');
 const fileUpload = require('express-fileupload');
 
 const router = express.Router();

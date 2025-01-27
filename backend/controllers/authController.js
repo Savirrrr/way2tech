@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const sendEmail = require('../utils/email');
 const PasswordReset = require('../models/passwordreset');
-
+const collections=require('../utils/db');
 const saltRounds = 10;
 
 const registerUser = async (db, req, res) => {
@@ -18,25 +18,35 @@ const registerUser = async (db, req, res) => {
 };
 
 const loginUser = async (db, req, res) => {
-    // console.log(req.body);
+    console.log(req.body);
     
     const { emailOrUsername, password } = req.body;
-    // console.log(emailOrUsername,password);
+    console.log(emailOrUsername,password);
     
     try {
-        const user = await db.collection('users').findOne({ emailOrUsername });
+        console.log("validating");
+        let searchQuery;
+        if (emailOrUsername.includes('@')) {
+            searchQuery = { email: { $regex: new RegExp(`^${emailOrUsername}$`, 'i') } };
+        } else {
+            searchQuery = { username: emailOrUsername };
+        }
+        const user = await collections.users.findOne({ searchQuery });
         console.log(user);
         
         if (!user || !(await comparePassword(password, user.password))) {
+            console.log(user.password);
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-        //     expiresIn: process.env.TOKEN_EXPIRY,
-        // });
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+            expiresIn: process.env.TOKEN_EXPIRY,
+        });
 
         res.status(200).json({ 'token':'token' });
     } catch (error) {
+        console.log(error);
+        
         res.status(500).json({ message: 'Login failed.', error });
     }
 };

@@ -14,6 +14,7 @@ async function connectDB() {
     collections.users = db.collection("users");
     collections.otpTokens = db.collection("otp_tokens");
     collections.uploads = db.collection("uploads");
+    // return collections;
   } catch (err) {
     console.error(err);
     process.exit(1);

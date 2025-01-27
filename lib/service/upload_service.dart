@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class UploadService {
-  static const String _uploadUrl = 'http://localhost:3000/upload';
+  static const String _uploadUrl = 'http://localhost:3000/api/upload';
 
   static Future<bool> uploadData({
     required String email,

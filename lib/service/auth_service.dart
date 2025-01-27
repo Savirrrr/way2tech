@@ -41,7 +41,7 @@ class AuthService {
   }
   static Future<int> resetPassword(String email, String newPassword) async {
     final response = await http.post(
-      Uri.parse('http://localhost:3000/resetpassword'),
+      Uri.parse('http://localhost:3000/api/auth/resetpassword'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -56,7 +56,7 @@ class AuthService {
   Future<bool> forgotPassword(String email) async {
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:3000/forgotpwd'),
+        Uri.parse('http://localhost:3000/api/auth/forgot-password'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -95,7 +95,7 @@ class AuthService {
   Future<bool> signUpUser(String username, String firstName, String lastName, String email, String password) async {
     try {
       var response = await http.post(
-        Uri.parse('$_baseUrl/signup'),
+        Uri.parse('$_baseUrl/register'),
         headers: {
           'Content-Type': 'application/json',
         },

@@ -8,8 +8,8 @@ class OTPService {
     try {
       final response = await http.post(
         Uri.parse(isRegistration
-            ? 'http://localhost:3000/verifySignupOtp'
-            : 'http://localhost:3000/verifyForgotPasswordOtp'),
+            ? 'http://localhost:3000/api/auth/verifySignupOtp'
+            : 'http://localhost:3000/api/auth/verifyForgotPasswordOtp'),
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode({'email': email, 'username': username, 'otp': otp}),
       );
@@ -29,7 +29,7 @@ class OTPService {
   Future<bool> resendOTP(String email) async {
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:3000/forgotpwd'),
+        Uri.parse('http://localhost:3000/api/auth/forgot-password'),
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode({'email': email}),
       );

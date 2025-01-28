@@ -12,10 +12,10 @@ router.post('/login', async (req, res) => {
     loginUser(req, res);
 });
 
-// router.post('/forgot-password', async (req, res) => {
-//     const db = await connectDB();
-//     forgotPassword(db, req, res);
-// });
+router.post('/forgot-password', async (req, res) => {
+    // const db = await connectDB();
+    forgotPassword( req, res);
+});
 
 // router.post('/requestpasswordreset', async (req, res) => {
 //     const db = await connectDB();
@@ -29,7 +29,7 @@ router.post('/login', async (req, res) => {
 
 router.post('/verifySignupOtp', verifySignupOtp);
 
-// router.post('/verifyForgotPasswordOtp', verifyForgotPasswordOtp);
+router.post('/verifyForgotPasswordOtp', verifyForgotPasswordOtp);
 
 
 module.exports = router;

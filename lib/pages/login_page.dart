@@ -1,6 +1,7 @@
 // login_page.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:way2techv1/pages/forgot_password.dart';
 import 'package:way2techv1/service/auth_service.dart';
 import 'package:way2techv1/widget/login_widgets.dart';
 
@@ -77,13 +78,25 @@ class _LoginpageState extends State<Loginpage> {
               const SizedBox(height: 5),
               PasswordField(passwordController: _passwordController),
               const SizedBox(height: 10),
-              RememberMeRow(
-                rememberMe: _rememberMe,
-                onChanged: (value) {
-                  setState(() {
-                    _rememberMe = value!;
-                  });
-                },
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ForgotPasswordPage(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "Forgot Password?",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
               Center(

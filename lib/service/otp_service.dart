@@ -32,6 +32,34 @@ class OTPService {
       return false;
     }
   }
+  Future<bool> verifyOTPpwd(String email,String otp, bool isRegistration) async {
+    final url = Uri.parse("http://localhost:3000/api/auth/verifyForgotPasswordOtp");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email,"otp": otp}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data["success"]) {
+          return true; 
+        } else {
+          print("Error: ${data["message"]}");
+          return false;
+        }
+      } else {
+        print("Server error: ${response.statusCode} - ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Exception: Failed to connect to server: $e");
+      return false;
+    }
+  }
   // Function to resend OTP
   Future<bool> resendOTP(String email) async {
     try {

@@ -39,12 +39,12 @@ const registerUser = async (req, res) => {
         // console.log('Inserted OTP Document:', insertedOtp);
         const emailBody = `Your OTP code is: ${otp}`;
         // console.log("calling email function");
-        console.log("MAILING PARAMETERS",email,emailBody);
+        // console.log("MAILING PARAMETERS",email,emailBody);
         
         try {
-            console.log("Preparing to send email...");
+            // console.log("Preparing to send email...");
             await sendEmail(email, 'Account Verification OTP', emailBody);
-            console.log("Email function executed successfully.");
+            // console.log("Email function executed successfully.");
         } catch (err) {
             console.error("Error while calling sendEmail:", err.message);
             res.status(500).json({ message: 'Email sending failed.', error: err.message });
@@ -57,20 +57,20 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     const {collection}=await getDB()
     const { emailOrUsername, password } = req.body;
-    console.log(emailOrUsername,password);
+    // console.log(emailOrUsername,password);
     
     try {
-        console.log("validating");
+        // console.log("validating");
         let searchQuery;
         if (emailOrUsername.includes('@')) {
             searchQuery = { email: emailOrUsername };
         } else {
             searchQuery = { username: emailOrUsername };
         }
-        console.log(searchQuery);
+        // console.log(searchQuery);
         if (!collection) {
             console.log("Collection is not initialized");
         }
@@ -81,9 +81,9 @@ const loginUser = async (req, res) => {
             console.log("INVALID");
             
         }
-        console.log("USER",user);
+        // console.log("USER",user);
         const isPasswordValid = await bcrypt.compare(password, user.password);
-        console.log(isPasswordValid);
+        // console.log(isPasswordValid);
         
         if (!user || !isPasswordValid) {
             return res.status(401).json({ message: "Invalid credentials" });
@@ -99,21 +99,30 @@ const loginUser = async (req, res) => {
 };
 
 
-const forgotPassword = async (db, req, res) => {
+const forgotPassword = async (req, res) => {
     const { email } = req.body;
-
+    const {collection,otpCollection} = await getDB();
+    // console.log("collection loaded");
+    
     try {
-        const user = await db.collection('users').findOne({ email });
+        const user = collection.findOne({ email });
         if (!user) return res.status(404).json({ message: 'User not found.' });
-
-        const reset = new PasswordReset(email);
-        await db.collection('password_resets').insertOne(reset);
-
-        const resetLink = `http://localhost:3000/reset-password?token=${reset.token}`;
-        await sendEmail(email, 'Password Reset Request', `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`);
-
-        res.status(200).json({ message: 'Password reset email sent.' });
+        // console.log("user found");
+        // const reset = new PasswordReset(email);
+        // console.log("RESET",reset);
+        await otpCollection.deleteMany({ email: email });
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const emailBody = `Your OTP code is: ${otp}`;
+        await sendEmail(email, 'Account Verification OTP', emailBody);
+        // await db.collection('password_resets').insertOne(reset);
+        // const resetLink = `http://localhost:3000/reset-password?token=${reset.token}`;
+        // await sendEmail(email, 'Password Reset Request', `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`);
+        // console.log("email sent,check");
+        
+        res.status(200).json({ message: 'Password  email sent.' });
     } catch (error) {
+        console.log("ERROr",error);
+        
         res.status(500).json({ message: 'Error processing request.', error });
     }
 };
@@ -207,6 +216,7 @@ const verifySignupOtp = async (req, res) => {
 const verifyForgotPasswordOtp = async (req, res) => {
     const { email, otp } = req.body;
     const emailLower = email.toLowerCase();
+    const {otpCollection}=await getDB();
     try {
         const otpRecord = await otpCollection.findOne({ email: emailLower, otp });
 

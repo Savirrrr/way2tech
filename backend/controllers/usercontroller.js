@@ -1,12 +1,18 @@
-const getUserProfile = async (db, req, res) => {
+const { getDB } = require('../utils/db');
+
+const getUserProfile = async (req, res) => {
     try {
-        const user = await db.collection('users').findOne({ _id: req.user.id });
-        if (!user) return res.status(404).json({ message: 'User not found' });
-        res.status(200).json(user);
+        const { username } = req.body;
+        if (!username) {
+            return res.status(400).json({ message: 'Username is required' });
+        }
+        const { collection } = await getDB();
+        const user = await collection.findOne({ username });
+        res.status(200).json({ isTaken: !!user });
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching profile', error });
+        console.error('Error checking username:', error);
+        res.status(500).json({ message: 'Internal error', error });
     }
 };
-
 
 module.exports = { getUserProfile };

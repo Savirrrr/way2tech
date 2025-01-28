@@ -27,7 +27,7 @@ router.post('/login', async (req, res) => {
 //     resetPassword(db, req, res);
 // });
 
-// router.post('/verifySignupOtp', verifySignupOtp);
+router.post('/verifySignupOtp', verifySignupOtp);
 
 // router.post('/verifyForgotPasswordOtp', verifyForgotPasswordOtp);
 

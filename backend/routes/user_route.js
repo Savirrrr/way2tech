@@ -4,9 +4,9 @@ const {connectDB} = require('../utils/db');
 
 const router = express.Router();
 
-router.get('/profile', async (req, res) => {
-    const db = await connectDB();
-    getUserProfile(db, req, res);
+router.post('/profile', async (req, res) => {
+    // const db = await connectDB();
+    getUserProfile(req, res);
 });
 // router.get('/reject/:tempId', rejectUpload);
 

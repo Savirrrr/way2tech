@@ -5,26 +5,33 @@ import 'package:http/http.dart' as http;
 class OTPService {
   // Function to verify OTP
   Future<bool> verifyOTP(String email, String username, String otp, bool isRegistration) async {
+    final url = Uri.parse("http://localhost:3000/api/auth/verifySignupOtp");
+
     try {
       final response = await http.post(
-        Uri.parse(isRegistration
-            ? 'http://localhost:3000/api/auth/verifySignupOtp'
-            : 'http://localhost:3000/api/auth/verifyForgotPasswordOtp'),
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode({'email': email, 'username': username, 'otp': otp}),
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email, "username": username, "otp": otp}),
       );
 
       if (response.statusCode == 200) {
-        return true;
+        final data = jsonDecode(response.body);
+
+        if (data["success"]) {
+          return true; 
+        } else {
+          print("Error: ${data["message"]}");
+          return false;
+        }
       } else {
+        print("Server error: ${response.statusCode} - ${response.body}");
         return false;
       }
     } catch (e) {
-      print('Error verifying OTP: $e');
+      print("Exception: Failed to connect to server: $e");
       return false;
     }
   }
-
   // Function to resend OTP
   Future<bool> resendOTP(String email) async {
     try {

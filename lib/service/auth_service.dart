@@ -68,23 +68,34 @@ class AuthService {
       return false;
     }
   }
-  
-  Future<bool> isUsernameTaken(String username) async {
-    try {
-      var response = await http.get(
-        Uri.parse('http://localhost:3000/api/user/profile'),
-      );
+Future<bool> checkIfUsernameExists(String email) async {
+  final url = Uri.parse("http://localhost:3000/api/user/profile");
 
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        return data['isTaken'];
+  try {
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      
+      if (data.containsKey("isTaken")) {
+        return data["isTaken"]; 
       } else {
-        throw Exception('Failed to check username');
+        print("Unexpected response format: $data");
+        return false;
       }
-    } catch (e) {
-      throw Exception('An error occurred: $e');
+    } else {
+      print("Server error: ${response.statusCode} - ${response.body}");
+      return false; 
     }
+  } catch (e) {
+    print("Exception: Failed to connect to server: $e");
+    return false;
   }
+}
 
   Future<bool> signUpUser(String username, String firstName, String lastName, String email, String password) async {
     try {

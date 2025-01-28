@@ -82,7 +82,9 @@ const loginUser = async (req, res) => {
             
         }
         console.log("USER",user);
-        const isPasswordValid = await bcrypt.compare(password, password);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        console.log(isPasswordValid);
+        
         if (!user || !isPasswordValid) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
@@ -168,15 +170,21 @@ const resetPassword = async (db, req, res) => {
 const verifySignupOtp = async (req, res) => {
     const { email, username, otp } = req.body;
     try {
+        console.log(email,username,otp);
+        
+        const {otpCollection,collection}=await getDB();
+        console.log(otpCollection);
+        
         const emailLower = email.toLowerCase();
         const otpRecord = await otpCollection.findOne({ email: emailLower, otp });
-
+        console.log(otpRecord);
+        
         if (!otpRecord) {
-            return res.status(401).send('Invalid or expired OTP');
+            return res.status(401).json({ success: false, message: 'Invalid or expired OTP' });
         }
 
         if (new Date() > otpRecord.expires_at) {
-            return res.status(401).send('Invalid or expired OTP');
+            return res.status(401).json({ success: false, message: 'OTP expired' });
         }
 
         const userData = {
@@ -190,13 +198,12 @@ const verifySignupOtp = async (req, res) => {
         await collection.insertOne(userData);
         await otpCollection.deleteOne({ email: emailLower, otp });
 
-        res.status(200).send('User verified and added to database');
+        res.status(200).json({ success: true, message: 'User verified and added to database' });
     } catch (err) {
         console.error(`Error verifying OTP: ${err}`);
-        res.status(500).send('Internal server error');
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
-
 const verifyForgotPasswordOtp = async (req, res) => {
     const { email, otp } = req.body;
     const emailLower = email.toLowerCase();
@@ -214,11 +221,11 @@ const verifyForgotPasswordOtp = async (req, res) => {
     }
 };
 
-// module.exports = { registerUser, forgotPassword, loginUser, requestPasswordReset, resetPassword, verifyForgotPasswordOtp, verifySignupOtp };
 module.exports = {
     registerUser,
     forgotPassword,
     verifyForgotPasswordOtp,
     verifySignupOtp,
-    loginUser
+    loginUser,
+    resetPassword
   };

@@ -1,25 +1,32 @@
+require('dotenv').config();
+const { MongoClient } = require('mongodb');
 const bcrypt = require('bcrypt');
 const sendEmail = require('../utils/email');
 const PasswordReset = require('../models/passwordreset');
-const collections=require('../utils/db');
+const {getDB}=require('../utils/db');
+const jwt = require('jsonwebtoken');
 const saltRounds = 10;
 
-const registerUser = async (db, req, res) => {
-    const { username, email, password } = req.body;
+
+const registerUser = async (req, res) => {
+    const { username, email, password, firstName, lastName} = req.body;
 
     try {
+        const {collection,otpCollection}=await getDB()
+        await otpCollection.deleteMany({ email: user.email });
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        const user = { username, email, password: hashedPassword, createdAt: new Date() };
-        await db.collection('users').insertOne(user);
+        await otpCollection.deleteMany({ email: user.email });
+        const user = { firstName,lastName,username, email, password: hashedPassword, createdAt: new Date() };
+        await collection.insertOne(user);
         res.status(201).json({ message: 'User registered successfully.' });
     } catch (error) {
         res.status(500).json({ message: 'Registration failed.', error });
     }
 };
 
-const loginUser = async (db, req, res) => {
+const loginUser = async (req, res) => {
     console.log(req.body);
-    
+    const {collection}=await getDB()
     const { emailOrUsername, password } = req.body;
     console.log(emailOrUsername,password);
     
@@ -27,29 +34,36 @@ const loginUser = async (db, req, res) => {
         console.log("validating");
         let searchQuery;
         if (emailOrUsername.includes('@')) {
-            searchQuery = { email: { $regex: new RegExp(`^${emailOrUsername}$`, 'i') } };
+            searchQuery = { email: emailOrUsername };
         } else {
             searchQuery = { username: emailOrUsername };
         }
-        const user = await collections.users.findOne({ searchQuery });
-        console.log(user);
-        
-        if (!user || !(await comparePassword(password, user.password))) {
-            console.log(user.password);
-            return res.status(401).json({ message: 'Invalid credentials' });
+        console.log(searchQuery);
+        if (!collection) {
+            console.log("Collection is not initialized");
         }
-
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-            expiresIn: process.env.TOKEN_EXPIRY,
-        });
-
-        res.status(200).json({ 'token':'token' });
-    } catch (error) {
+        // console.log("Collection initialized:", collection);
+        const user = await collection.findOne(searchQuery);
+        if(!user)
+        {
+            console.log("INVALID");
+            
+        }
+        console.log("USER",user);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!user || !isPasswordValid) {
+            return res.status(401).json({ message: "Invalid credentials" });
+        }
+        console.log(`User logged in successfully: ${emailOrUsername}`);
+        return res.status(200).send('User logged in successfully');
+        } 
+        catch (error) {
         console.log(error);
         
         res.status(500).json({ message: 'Login failed.', error });
     }
 };
+
 
 const forgotPassword = async (db, req, res) => {
     const { email } = req.body;
@@ -168,4 +182,11 @@ const verifyForgotPasswordOtp = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, forgotPassword, loginUser, requestPasswordReset, resetPassword, verifyForgotPasswordOtp, verifySignupOtp };
+// module.exports = { registerUser, forgotPassword, loginUser, requestPasswordReset, resetPassword, verifyForgotPasswordOtp, verifySignupOtp };
+module.exports = {
+    registerUser,
+    forgotPassword,
+    verifyForgotPasswordOtp,
+    verifySignupOtp,
+    loginUser
+  };

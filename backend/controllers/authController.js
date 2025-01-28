@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
 const bcrypt = require('bcrypt');
-const sendEmail = require('../utils/email');
+const {sendEmail} = require('../utils/email');
 const PasswordReset = require('../models/passwordreset');
 const {getDB}=require('../utils/db');
 const jwt = require('jsonwebtoken');
@@ -9,16 +9,48 @@ const saltRounds = 10;
 
 
 const registerUser = async (req, res) => {
+    // console.log(req.body);
+    
     const { username, email, password, firstName, lastName} = req.body;
 
     try {
-        const {collection,otpCollection}=await getDB()
-        await otpCollection.deleteMany({ email: user.email });
+        const {otpCollection}=await getDB()
+        
+        await otpCollection.deleteMany({ email: email });
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        await otpCollection.deleteMany({ email: user.email });
-        const user = { firstName,lastName,username, email, password: hashedPassword, createdAt: new Date() };
-        await collection.insertOne(user);
-        res.status(201).json({ message: 'User registered successfully.' });
+        // console.log(hashedPassword,"HASHED PASSWORD");
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const expirationTime = new Date(Date.now() + 10 * 60 * 1000);
+
+        const insertResult = await otpCollection.insertOne({
+            fname:firstName,
+            lname:lastName,
+            username:username,
+            email: email,
+            password: hashedPassword,
+            otp,
+            expires_at: expirationTime,
+            verified: false 
+        },{writeConsern:{w:"majority"} });
+
+        // console.log(`OTP Insertion Result: ${JSON.stringify(insertResult)}`);
+        const insertedOtp = await otpCollection.findOne({ _id: insertResult.insertedId });
+        // console.log('Inserted OTP Document:', insertedOtp);
+        const emailBody = `Your OTP code is: ${otp}`;
+        // console.log("calling email function");
+        console.log("MAILING PARAMETERS",email,emailBody);
+        
+        try {
+            console.log("Preparing to send email...");
+            await sendEmail(email, 'Account Verification OTP', emailBody);
+            console.log("Email function executed successfully.");
+        } catch (err) {
+            console.error("Error while calling sendEmail:", err.message);
+            res.status(500).json({ message: 'Email sending failed.', error: err.message });
+            return; 
+        }
+        res.status(200).json({message:'email sent'});
     } catch (error) {
         res.status(500).json({ message: 'Registration failed.', error });
     }
@@ -50,7 +82,7 @@ const loginUser = async (req, res) => {
             
         }
         console.log("USER",user);
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await bcrypt.compare(password, password);
         if (!user || !isPasswordValid) {
             return res.status(401).json({ message: "Invalid credentials" });
         }

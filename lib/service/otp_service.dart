@@ -43,15 +43,10 @@ class OTPService {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        if (data["success"]) {
-          return true; 
-        } else {
-          print("Error: ${data["message"]}");
-          return false;
-        }
-      } else {
+        print("SUCCESS");
+        return true;
+      }
+     else {
         print("Server error: ${response.statusCode} - ${response.body}");
         return false;
       }

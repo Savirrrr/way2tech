@@ -118,6 +118,9 @@ const forgotPassword = async (req, res) => {
         // const resetLink = `http://localhost:3000/reset-password?token=${reset.token}`;
         // await sendEmail(email, 'Password Reset Request', `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`);
         // console.log("email sent,check");
+        await otpCollection.deleteMany({ email: email });
+        await otpCollection.insertOne({email:email,otp});
+        console.log("otp inserted into collection successfully");
         
         res.status(200).json({ message: 'Password  email sent.' });
     } catch (error) {
@@ -127,47 +130,37 @@ const forgotPassword = async (req, res) => {
     }
 };
 
-const requestPasswordReset = async (db, req, res) => {
-    const { email } = req.body;
+// const requestPasswordReset = async (req, res) => {
+//     const { email } = req.body;
+//     const {collection}= await getDB();
+//     try {
+//         const user = await collection.findOne({ email });
+//         if (!user) return res.status(404).json({ message: 'Email not found' });
+
+//         const resetLink = `http://localhost:${process.env.PORT}/resetpassword?token=${passwordReset.token}`;
+//         await sendEmail(email, 'Password Reset', `<a href="${resetLink}">Reset Password</a>`);
+
+//         res.status(200).json({ message: 'Password reset email sent' });
+//     } catch (error) {
+//         console.error('Error requesting password reset:', error);
+//         res.status(500).json({ message: 'Password reset failed', error });
+//     }
+// };
+
+const resetPassword = async (req, res) => {
+    const { email, newPassword } = req.body;
+    const {collection}= await getDB();
     try {
-        // Check if the email exists
-        const user = await db.collection('users').findOne({ email });
-        if (!user) return res.status(404).json({ message: 'Email not found' });
 
-        // Create a reset token and store in PasswordReset collection
-        const passwordReset = new PasswordReset(email);
-        await db.collection('password_resets').insertOne(passwordReset);
 
-        // Send email to user with reset link
-        const resetLink = `http://localhost:${process.env.PORT}/resetpassword?token=${passwordReset.token}`;
-        await sendEmail(email, 'Password Reset', `<a href="${resetLink}">Reset Password</a>`);
-
-        res.status(200).json({ message: 'Password reset email sent' });
-    } catch (error) {
-        console.error('Error requesting password reset:', error);
-        res.status(500).json({ message: 'Password reset failed', error });
-    }
-};
-
-const resetPassword = async (db, req, res) => {
-    const { token, newPassword } = req.body;
-
-    try {
-        const resetRequest = await db.collection('password_resets').findOne({ token });
-        if (!resetRequest || resetRequest.expiresAt < new Date()) {
-            return res.status(400).json({ message: 'Token expired or invalid' });
-        }
-
-        const user = await db.collection('users').findOne({ email: resetRequest.email });
+        const user = await collection.findOne({ email });
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        const hashedPassword = await hashPassword(newPassword);
-        await db.collection('users').updateOne(
-            { email: resetRequest.email },
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+        await collection.updateOne(
+            { email: email },
             { $set: { password: hashedPassword } }
         );
-
-        await db.collection('password_resets').deleteOne({ token });
 
         res.status(200).json({ message: 'Password reset successfully' });
     } catch (error) {
@@ -224,7 +217,7 @@ const verifyForgotPasswordOtp = async (req, res) => {
             return res.status(401).send('Invalid or expired OTP');
         }
 
-        res.status(200).send('OTP verified, proceed to change password');
+        res.status(200).json({ success: true, message: "OTP verified, proceed to change password" });
     } catch (err) {
         console.error(`Error verifying OTP: ${err}`);
         res.status(500).send('Internal server error');

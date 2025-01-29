@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:way2techv1/widget/navbar.dart';
 
 class TabSwitchingPage extends StatefulWidget {
-  @override
   final String email;
   TabSwitchingPage({required this.email});
+  @override
+  // ignore: library_private_types_in_public_api
   _TabSwitchingPageState createState() => _TabSwitchingPageState();
 }
 
@@ -31,7 +32,7 @@ class _TabSwitchingPageState extends State<TabSwitchingPage>
         automaticallyImplyLeading: false, // Removes back arrow
         titleSpacing: 0, // Removes extra padding at the title
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(48.0), // Height of the TabBar
+          preferredSize: const Size.fromHeight(48.0), // Height of the TabBar
           child: TabBar(
             controller: _tabController,
             indicator: BoxDecoration(
@@ -76,9 +77,9 @@ class _TabSwitchingPageState extends State<TabSwitchingPage>
                 color: Colors.grey,
               ),
               title: const Text('Beyond Tech 2.0'),
-              subtitle: Column(
+              subtitle: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text('27/11/2024 | 10AM - 5PM'),
                   Text('Microsoft, Hyderabad'),
                 ],
@@ -104,9 +105,9 @@ class _TabSwitchingPageState extends State<TabSwitchingPage>
                 color: Colors.grey,
               ),
               title: const Text('Web Dev Intern'),
-              subtitle: Column(
+              subtitle: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text('Learn-x | Internship'),
                   Text('2.5k - 5k/month'),
                 ],

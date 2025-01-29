@@ -13,24 +13,26 @@ class _NavbarState extends State<Navbar> {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    if (_selectedIndex != index) {
+      setState(() {
+        _selectedIndex = index;
+      });
 
-    // Navigation logic based on index
-    switch (index) {
-      case 0:
-        context.go('/home'); 
-        break;
-      case 1:
-        context.go('/upload'); 
-        break;
-      case 2:
-        context.go('/tabswitch'); 
-        break;
-      case 3:
-        context.go('/account', extra: widget.email); 
-        break;
+      // Navigation logic based on index
+      switch (index) {
+        case 0:
+          context.go('/home');
+          break;
+        case 1:
+          context.go('/upload');
+          break;
+        case 2:
+          context.go('/tabswitch');
+          break;
+        case 3:
+          context.go('/account', extra: widget.email);
+          break;
+      }
     }
   }
 
@@ -39,18 +41,32 @@ class _NavbarState extends State<Navbar> {
     final bool isSelected = _selectedIndex == index;
 
     return GestureDetector(
-      onTap: () {
-        _onItemTapped(index); 
-      },
+      onTap: () => _onItemTapped(index),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            isSelected ? selectedIcon : unselectedIcon,
-            color: isSelected ? Colors.black : Colors.grey, 
-            size: 28.0,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.black.withOpacity(0.1) : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              isSelected ? selectedIcon : unselectedIcon,
+              color: isSelected ? Colors.black : Colors.grey,
+              size: 28.0,
+            ),
           ),
           const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.black : Colors.grey,
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
         ],
       ),
     );
@@ -61,7 +77,7 @@ class _NavbarState extends State<Navbar> {
     return BottomAppBar(
       color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [

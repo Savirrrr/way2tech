@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:way2techv1/models/upload_model.dart';
-import 'package:way2techv1/pages/home.dart';
 
 class FlipPage extends StatelessWidget {
   final UploadData data;

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:way2techv1/models/upload_model.dart';
-import 'package:way2techv1/pages/home.dart';
+
 class ApiService {
   static const String _baseUrl = 'http://localhost:3000/api';
 

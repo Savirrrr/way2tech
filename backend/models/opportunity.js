@@ -1,12 +1,36 @@
+// models/opportunity.js
 const mongoose = require('mongoose');
 
-const eventSchema = new mongoose.Schema({
-    title: String,
-    description: String,
-    link: String,
-    status: { type: String, default: 'Pending' }
+const opportunitySchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  caption: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  userId: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  mediaUrl: {
+    type: String,
+    trim: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-const Event = mongoose.models.Event || mongoose.model('Event', opportunitySchema);
+module.exports = mongoose.model('Opportunity', opportunitySchema);
 
-module.exports = Event;

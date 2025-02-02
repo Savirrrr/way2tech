@@ -140,6 +140,7 @@ class _AccountPageState extends State<AccountPage> {
       ),
       bottomNavigationBar: Navbar(
         email: email ?? '',
+        initialIndex: 3,
       ),
     );
   }

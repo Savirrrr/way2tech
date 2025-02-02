@@ -1,10 +1,6 @@
-// main.dart or router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
-
-// navbar.dart
 class Navbar extends StatefulWidget {
   final String email;
   final int initialIndex;
@@ -47,44 +43,6 @@ class _NavbarState extends State<Navbar> {
     context.go('$path?email=$encodedEmail');
   }
 
-  Widget _buildNavItem(
-    int index,
-    IconData selectedIcon,
-    IconData unselectedIcon,
-  ) {
-    final bool isSelected = _selectedIndex == index;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _onItemTapped(index),
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.black.withOpacity(0.1) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  isSelected ? selectedIcon : unselectedIcon,
-                  color: isSelected ? Colors.black : Colors.grey,
-                  size: 28.0,
-                ),
-              ),
-              const SizedBox(height: 4),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -98,22 +56,44 @@ class _NavbarState extends State<Navbar> {
           ),
         ],
       ),
-      child: SafeArea(
-        child: BottomAppBar(
-          color: Colors.white,
-          elevation: 0,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(0, Icons.home, Icons.home_outlined),
-                _buildNavItem(1, Icons.upload, Icons.upload_outlined),
-                _buildNavItem(2, Icons.event, Icons.event_outlined),
-                _buildNavItem(3, Icons.person, Icons.person_outline),
-              ],
-            ),
-          ),
+      child: BottomNavigationBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        items: [
+          _buildNavItem(0, Icons.home, Icons.home_outlined),
+          _buildNavItem(1, Icons.upload, Icons.upload_outlined),
+          _buildNavItem(2, Icons.event, Icons.event_outlined),
+          _buildNavItem(3, Icons.person, Icons.person_outline),
+        ],
+      ),
+    );
+  }
+
+  BottomNavigationBarItem _buildNavItem(
+    int index,
+    IconData selectedIcon,
+    IconData unselectedIcon,
+  ) {
+    final bool isSelected = _selectedIndex == index;
+
+    return BottomNavigationBarItem(
+      backgroundColor: Colors.transparent,
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        // decoration: BoxDecoration(
+        //   color: isSelected ? Colors.white.withOpacity(0.9) : Colors.transparent,
+        //   borderRadius: BorderRadius.circular(8),
+        // ),
+        child: Icon(
+          isSelected ? selectedIcon : unselectedIcon,
+          size: 24,
         ),
       ),
     );

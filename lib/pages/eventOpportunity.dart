@@ -87,7 +87,7 @@ class _EventopprotunitiesState extends State<Eventopprotunities> {
           ],
         ),
       ),
-      bottomNavigationBar: Navbar(email: widget.email),
+      bottomNavigationBar: Navbar(email: widget.email,initialIndex: 2,),
     );
   }
 }

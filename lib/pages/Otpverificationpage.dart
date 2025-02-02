@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:way2techv1/pages/confirm_password.dart';
-import 'package:way2techv1/service/auth_service.dart';
 import 'package:way2techv1/service/otp_service.dart';
 
 class OTPVerificationPage extends StatefulWidget {

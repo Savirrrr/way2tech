@@ -89,7 +89,7 @@ class _FlipPageViewState extends State<FlipPageView> {
               : const Center(
                   child: Text("No data retrieved yet."),
                 ),
-      bottomNavigationBar: Navbar(email: widget.email),
+      bottomNavigationBar: Navbar(email: widget.email,initialIndex: 0,),
     );
   }
 }

@@ -59,6 +59,7 @@ class _TabSwitchingPageState extends State<TabSwitchingPage>
       ),
       bottomNavigationBar: Navbar(
         email: widget.email,
+        initialIndex: 2,
       ),
     );
   }

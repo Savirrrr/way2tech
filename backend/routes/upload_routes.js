@@ -1,9 +1,17 @@
+
+// routes/uploadRoutes.js
 const express = require('express');
 const router = express.Router();
-const { rejectUpload, editUpload, saveEditedUpload } = require('../controllers/uploadcontroller');
+const { 
+  createUpload, 
+  rejectUpload, 
+  editUpload, 
+  saveEditedUpload 
+} = require('../controllers/uploadController');
 
-router.get('/reject/:tempId', rejectUpload);
+router.post('/upload', createUpload);
+router.delete('/reject/:tempId', rejectUpload);
 router.get('/edit/:tempId', editUpload);
-router.post('/edit/:tempId', saveEditedUpload);
+router.put('/edit/:tempId', saveEditedUpload);
 
 module.exports = router;

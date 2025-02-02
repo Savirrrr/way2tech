@@ -47,49 +47,54 @@ class MyApp extends StatelessWidget {
         }
 
         final initialRoute = snapshot.data ?? '/';
+        
+        
+final GoRouter router = GoRouter(
+  initialLocation: '/home',
+  routes: [
+    GoRoute(
+      path: '/home',
+      builder: (context, state) {
+        final email = state.uri.queryParameters['email'] ?? '';
+        return FlipPageView(email: email);
+      },
+    ),
+    GoRoute(
+      path: '/upload',
+      builder: (context, state) {
+        final email = state.uri.queryParameters['email'] ?? '';
+        return UploadPage(email: email);
+      },
+    ),
+    GoRoute(
+      path: '/tabswitch',
+      builder: (context, state) {
+        final email = state.uri.queryParameters['email'] ?? '';
+        return Eventopprotunities(email: email);
+      },
+    ),
+    GoRoute(
+      path: '/account',
+      builder: (context, state) {
+        final email = state.uri.queryParameters['email'] ?? '';
+        return AccountPage(email: email);
+      },
+    ),
+    GoRoute(
+      path: '/loginsignup',
+      builder: (context, state) => const StartPage(),
+    ),
+    GoRoute(
+      path: '/onboarding',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const Loginpage(),
+    ),
+  ],
+);
 
-        final GoRouter router = GoRouter(
-          initialLocation: initialRoute,
-          routes: [
-            GoRoute(
-              path: '/home',
-              builder: (context, state) {
-                final email = state.uri.queryParameters['email'] ?? '';
-                return FlipPageView(email: email);
-              },
-            ),
-            GoRoute(
-              path: '/upload',
-              builder: (context, state) {
-                final email = state.uri.queryParameters['email'] ?? '';
-                return UploadPage(email: email);
-              },
-            ),
-            GoRoute(
-              path: '/tabswitch',
-              builder: (context, state) {
-                final email = state.uri.queryParameters['email'] ?? '';
-                return Eventopprotunities(email: email);
-              },
-            ),
-            GoRoute(
-              path: '/account',
-              builder: (context, state) {
-                final email = state.uri.queryParameters['email'] ?? '';
-                return AccountPage(email: email);
-              },
-            ),
-            GoRoute(
-              path: '/loginsignup',
-              builder: (context, state) => const StartPage(),
-            ),
-            GoRoute(
-              path: '/onboarding',
-              builder: (context, state) => const OnboardingScreen(),
-            ),
-            GoRoute(path: '/login',builder: (context, state) => const Loginpage(),)
-          ],
-        );
 
         return MaterialApp.router(
           title: 'Way2Tech',

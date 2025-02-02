@@ -11,6 +11,7 @@ const { initializeDB } = require('./utils/db');
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 
 async function startServer() {
     try {

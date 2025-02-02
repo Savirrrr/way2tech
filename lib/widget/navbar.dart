@@ -1,91 +1,119 @@
+// main.dart or router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+
+
+// navbar.dart
 class Navbar extends StatefulWidget {
   final String email;
-  const Navbar({super.key, required this.email});
+  final int initialIndex;
+
+  const Navbar({
+    super.key, 
+    required this.email,
+    this.initialIndex = 0,
+  });
 
   @override
   State<Navbar> createState() => _NavbarState();
 }
 
 class _NavbarState extends State<Navbar> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   void _onItemTapped(int index) {
-    if (_selectedIndex != index) {
-      setState(() {
-        _selectedIndex = index;
-      });
+    if (_selectedIndex == index) return;
 
-      // Navigation logic based on index
-      switch (index) {
-        case 0:
-          context.go('/home');
-          break;
-        case 1:
-          context.go('/upload');
-          break;
-        case 2:
-          context.go('/tabswitch');
-          break;
-        case 3:
-          context.go('/account', extra: widget.email);
-          break;
-      }
-    }
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    final String path = switch (index) {
+      0 => '/home',
+      1 => '/upload',
+      2 => '/tabswitch',
+      3 => '/account',
+      _ => '/home',
+    };
+
+    final String encodedEmail = Uri.encodeComponent(widget.email);
+    context.go('$path?email=$encodedEmail');
   }
 
   Widget _buildNavItem(
-      int index, IconData selectedIcon, IconData unselectedIcon, String label) {
+    int index,
+    IconData selectedIcon,
+    IconData unselectedIcon,
+  ) {
     final bool isSelected = _selectedIndex == index;
 
-    return GestureDetector(
-      onTap: () => _onItemTapped(index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: isSelected ? Colors.black.withOpacity(0.1) : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              isSelected ? selectedIcon : unselectedIcon,
-              color: isSelected ? Colors.black : Colors.grey,
-              size: 28.0,
-            ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _onItemTapped(index),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.black.withOpacity(0.1) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  isSelected ? selectedIcon : unselectedIcon,
+                  color: isSelected ? Colors.black : Colors.grey,
+                  size: 28.0,
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.black : Colors.grey,
-              fontSize: 12,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BottomAppBar(
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(0, Icons.home, Icons.home_outlined, 'Home'),
-            _buildNavItem(1, Icons.upload, Icons.upload_outlined, 'Upload'),
-            _buildNavItem(2, Icons.event, Icons.event_outlined, 'Events'),
-            _buildNavItem(3, Icons.person, Icons.person_outline, 'Account'),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: BottomAppBar(
+          color: Colors.white,
+          elevation: 0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(0, Icons.home, Icons.home_outlined),
+                _buildNavItem(1, Icons.upload, Icons.upload_outlined),
+                _buildNavItem(2, Icons.event, Icons.event_outlined),
+                _buildNavItem(3, Icons.person, Icons.person_outline),
+              ],
+            ),
+          ),
         ),
       ),
     );

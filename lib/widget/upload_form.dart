@@ -6,11 +6,13 @@ class UploadForm extends StatelessWidget {
   final TextEditingController captionController;
   final File? imageFile;
   final bool acceptTerms;
+  final bool isLoading;
   final VoidCallback onPickImage;
   final ValueChanged<bool?> onAcceptTerms;
-  final VoidCallback onUpload;
+  final VoidCallback? onUpload;
 
   const UploadForm({
+    Key? key,
     required this.titleController,
     required this.captionController,
     this.imageFile,
@@ -18,7 +20,8 @@ class UploadForm extends StatelessWidget {
     required this.onPickImage,
     required this.onAcceptTerms,
     required this.onUpload,
-  });
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +39,7 @@ class UploadForm extends StatelessWidget {
             border: OutlineInputBorder(),
             hintText: 'Enter title',
           ),
+          enabled: !isLoading,
         ),
         const SizedBox(height: 16),
         const Text(
@@ -50,6 +54,7 @@ class UploadForm extends StatelessWidget {
             border: OutlineInputBorder(),
             hintText: 'Enter caption',
           ),
+          enabled: !isLoading,
         ),
         const SizedBox(height: 16),
         const Text(
@@ -58,11 +63,15 @@ class UploadForm extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         GestureDetector(
-          onTap: onPickImage,
+          onTap: isLoading ? null : onPickImage,
           child: Container(
             height: 150,
             width: double.infinity,
-            color: Colors.grey[300],
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(4),
+            ),
             child: imageFile == null
                 ? const Center(
                     child: Text(
@@ -70,7 +79,10 @@ class UploadForm extends StatelessWidget {
                       style: TextStyle(color: Colors.black54),
                     ),
                   )
-                : Image.file(imageFile!, fit: BoxFit.cover),
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: Image.file(imageFile!, fit: BoxFit.cover),
+                  ),
           ),
         ),
         const SizedBox(height: 16),
@@ -78,7 +90,7 @@ class UploadForm extends StatelessWidget {
           children: [
             Checkbox(
               value: acceptTerms,
-              onChanged: onAcceptTerms,
+              onChanged: isLoading ? null : onAcceptTerms,
             ),
             const Expanded(
               child: Text(
@@ -91,14 +103,15 @@ class UploadForm extends StatelessWidget {
         const SizedBox(height: 16),
         Center(
           child: ElevatedButton(
-            onPressed: acceptTerms ? onUpload : null,
+            onPressed: (acceptTerms && !isLoading) ? onUpload : null,
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               backgroundColor: Colors.black,
+              disabledBackgroundColor: Colors.grey,
             ),
-            child: const Text(
-              "UPLOAD NOW",
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              isLoading ? "UPLOADING..." : "UPLOAD NOW",
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ),

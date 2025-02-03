@@ -32,7 +32,7 @@ class _NavbarState extends State<Navbar> {
     });
 
     final String path = switch (index) {
-      0 => '/home',
+      0 => '/upload',
       1 => '/upload',
       2 => '/tabswitch',
       3 => '/account',
@@ -46,16 +46,6 @@ class _NavbarState extends State<Navbar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
       child: BottomNavigationBar(
         elevation: 0,
         backgroundColor: Colors.transparent,

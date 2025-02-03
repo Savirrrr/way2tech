@@ -4,14 +4,14 @@ import 'package:http/http.dart' as http;
 class UploadService {
   // static const String _baseUrl = 'http://10.0.2.2:3000'; // For Android emulator
   static const String _baseUrl = 'http://localhost:3000'; // For iOS simulator
-  
   static Future<bool> uploadData({
     required String email,
     required String title,
     required String caption,
     File? mediaFile,
   }) async {
-    try {
+    try {\
+      print("FLUTTER-------------------------------->",emai,title,caption);
       final uri = Uri.parse('$_baseUrl/api/upload');
       final request = http.MultipartRequest('POST', uri);
       request.fields.addAll({

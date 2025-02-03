@@ -1,12 +1,14 @@
-// controllers/uploadController.js
+
 const UploadOpportunity = require('../models/opportunity');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
-// Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+    const uploadDir = 'uploads/';
+    fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -15,24 +17,16 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-  fileFilter: function (req, file, cb) {
-    const allowedTypes = /jpeg|jpg|png|mp4/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    
-    if (extname && mimetype) {
-      return cb(null, true);
-    }
-    cb(new Error('Only jpeg, jpg, png, and mp4 files are allowed!'));
-  }
+  limits: { fileSize: 10 * 1024 * 1024 },
 }).single('media');
 
-// Store temporary uploads with TTL
+
 const tempUploads = new Map();
-const TEMP_UPLOAD_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const TEMP_UPLOAD_TTL = 24 * 60 * 60 * 1000; 
 
 exports.createUpload = async (req, res) => {
+  console.log('Request Body:', req.body);
+  console.log('Email:', req.body.email);
   try {
     upload(req, res, async function(err) {
       if (err instanceof multer.MulterError) {
@@ -52,13 +46,11 @@ exports.createUpload = async (req, res) => {
         mediaUrl: req.file ? `/uploads/${req.file.filename}` : null
       };
 
-      // Store in temporary storage
       tempUploads.set(tempId, {
         data: uploadData,
         timestamp: Date.now()
       });
 
-      // Set timeout to clean up temporary upload
       setTimeout(() => {
         tempUploads.delete(tempId);
       }, TEMP_UPLOAD_TTL);

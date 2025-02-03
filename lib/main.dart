@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       await prefs.setBool('isFirstRun', false);
       return '/onboarding';
     } else if (email != null && email.isNotEmpty) {
-      return '/home';
+      return '/upload';
     } else {
       return '/loginsignup';
     }
@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
           );
         }
 
-        final initialRoute = snapshot.data ?? '/';
+        // final initialRoute = snapshot.data ?? '/';
         
         
 final GoRouter router = GoRouter(

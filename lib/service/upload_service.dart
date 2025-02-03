@@ -10,9 +10,9 @@ class UploadService {
     required String caption,
     File? mediaFile,
   }) async {
-    try {\
-      print("FLUTTER-------------------------------->",emai,title,caption);
-      final uri = Uri.parse('$_baseUrl/api/upload');
+    try {
+      print("FLUTTER-------------------------------->${email},${title},${caption}");
+      final uri = Uri.parse('$_baseUrl/api/upload/upload');
       final request = http.MultipartRequest('POST', uri);
       request.fields.addAll({
         'title': title,

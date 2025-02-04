@@ -42,7 +42,7 @@ const getDetails= async (req,res)=>{
     if(!user){
         res.status(500).send('User not found');
     }
-    res.status(200).json({firstname:user.firstname,lastname:user.lastname,username:user.username})
+    res.status(200).json({firstname:user.firstname,lastname:user.lastname,username:user.username,email:user.email})
 }
 
 module.exports = { getUserProfile ,updateProfile, getDetails};

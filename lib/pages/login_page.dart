@@ -15,7 +15,7 @@ class Loginpage extends StatefulWidget {
 class _LoginpageState extends State<Loginpage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _rememberMe = false;
+  // bool _rememberMe = false;s
   bool _isLoading = false;
 
   final AuthService _authService = AuthService();

@@ -1,5 +1,3 @@
-// lib/pages/account_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:way2techv1/models/user_model.dart';
@@ -12,16 +10,16 @@ import 'package:go_router/go_router.dart';
 class AccountPage extends StatefulWidget {
   final String? email;
 
-  AccountPage({this.email});
+  const AccountPage({Key? key, this.email}) : super(key: key);
 
   @override
   _AccountPageState createState() => _AccountPageState();
 }
 
 class _AccountPageState extends State<AccountPage> {
-  String? email;
-  String? username;
-  String? fullName;
+  UserModel? userDetails;
+  bool isLoading = true;
+  String? currentEmail;
 
   @override
   void initState() {
@@ -30,34 +28,52 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> loadEmailAndUserDetails() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userEmail = prefs.getString('userEmail');
-
-  if (userEmail != null) {
     try {
-      UserModel userDetails = await retrieveUserDetails(userEmail);
       setState(() {
-        email = userEmail;
-        username = userDetails.username;
-        fullName = "${userDetails.firstName} ${userDetails.lastName}";
+        isLoading = true;
       });
-    } catch (e, stackTrace) {
-      print("Error loading user details: $e");
-      print(stackTrace);
+
+      // First try to get email from widget property
+      String? userEmail = widget.email;
+
+      // If not available, try to get from SharedPreferences
+      if (userEmail == null || userEmail.isEmpty) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        userEmail = prefs.getString('userEmail');
+      }
+
+      if (userEmail != null && userEmail.isNotEmpty) {
+        try {
+          final details = await retrieveUserDetails(userEmail);
+          setState(() {
+            userDetails = details;
+            currentEmail = userEmail;
+            isLoading = false;
+          });
+        } catch (e) {
+          print("Error loading user details: $e");
+          setState(() {
+            userDetails = UserModel(
+              email: userEmail!,
+              username: "Unknown User",
+              firstName: "Unknown",
+              lastName: "User",
+            );
+            currentEmail = userEmail;
+            isLoading = false;
+          });
+        }
+      } else {
+        // No email found - user needs to login
+        context.go('/login');
+      }
+    } catch (e) {
+      print("Error in loadEmailAndUserDetails: $e");
       setState(() {
-        email = userEmail;
-        username = "Unknown User";
-        fullName = "Unknown User";
+        isLoading = false;
       });
     }
-  } else {
-    setState(() {
-      email = null;
-      username = "Unknown User";
-      fullName = "Unknown User";
-    });
   }
-}
 
   Future<void> clearUserEmail() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -65,8 +81,15 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _logout() async {
-    await clearUserEmail();
-    context.go('/login');
+    try {
+      await clearUserEmail();
+      context.go('/login');
+    } catch (e) {
+      print("Error during logout: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error logging out. Please try again.')),
+      );
+    }
   }
 
   @override
@@ -75,16 +98,18 @@ class _AccountPageState extends State<AccountPage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: email == null
-            ? Center(child: CircularProgressIndicator())
-            : Column(
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 children: [
-                  ProfileCard(
-                    fullName: fullName ?? 'Unknown User',
-                    username: username ?? 'No username',
-                  ),
+                  if (userDetails != null)
+                    ProfileCard(
+                      email: currentEmail!,
+                      fullName: "${userDetails!.firstName} ${userDetails!.lastName}",
+                      username: userDetails!.username,
+                    ),
                   SizedBox(height: 20),
                   Expanded(
                     child: ListView(
@@ -137,11 +162,13 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                 ],
               ),
-      ),
-      bottomNavigationBar: Navbar(
-        email: email ?? '',
-        initialIndex: 3,
-      ),
+            ),
+      bottomNavigationBar: currentEmail != null
+          ? Navbar(
+              email: currentEmail!,
+              initialIndex: 3,
+            )
+          : null,
     );
   }
 }

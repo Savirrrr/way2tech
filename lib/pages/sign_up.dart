@@ -66,7 +66,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       bool usernameTaken = await _authService.checkIfUsernameExists(username);
-      if (usernameTaken!) {
+      if (usernameTaken) {
         setState(() {
           _usernameError = 'Username is already taken';
         });

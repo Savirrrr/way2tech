@@ -8,8 +8,8 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
   return UserModel(
     username: json['username'] ?? 'Unknown',
-    firstName: json['firstName'] ?? 'Unknown',
-    lastName: json['lastName'] ?? 'Unknown',
+    firstName: json['firstname'] ?? 'Unknown',
+    lastName: json['lastname'] ?? 'Unknown',
   );
 }
 }

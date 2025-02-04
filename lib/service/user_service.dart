@@ -1,11 +1,10 @@
-// lib/services/user_service.dart
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:way2techv1/models/user_model.dart';
 
 Future<UserModel> retrieveUserDetails(String email) async {
-  final url = Uri.parse('http://localhost:3000/api/user/profile');
+  print("FLUTTER------------------>${email}");
+  final url = Uri.parse('http://localhost:3000/api/user/getDetails');
 
   try {
     final response = await http.post(

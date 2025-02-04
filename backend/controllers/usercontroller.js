@@ -15,4 +15,34 @@ const getUserProfile = async (req, res) => {
     }
 };
 
-module.exports = { getUserProfile };
+const updateProfile=async (req,res)=>{
+    const  {uname,updatedUname}=req.body;
+    const { collection } = await getDB();
+    const user = await collection.findOne({ username: uname });
+    if (!user) {
+        res.status(500).send('User not found');
+    }
+    try
+    {
+    const updatedUser = await collection.updateOne({ username: uname }, { $set: { username: updatedUname}});
+    res.status(200).send('Username updated successfully');
+    }
+    catch(err)
+    {
+        console.error('error in updating username');
+        res.status(500).send('couldnt update username');
+    }
+
+};
+
+const getDetails= async (req,res)=>{
+    const {email}=req.body;
+    const { collection } = await getDB();
+    const user=await collection.findOne({email:email});
+    if(!user){
+        res.status(500).send('User not found');
+    }
+    res.status(200).json({firstname:user.firstname,lastname:user.lastname,username:user.username})
+}
+
+module.exports = { getUserProfile ,updateProfile, getDetails};

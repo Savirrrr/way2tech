@@ -17,6 +17,7 @@ class UploadPage extends StatefulWidget {
 class _UploadPageState extends State<UploadPage> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController captionController = TextEditingController();
+  
   bool acceptTerms = false;
   bool isLoading = false;
   File? _imageFile;
@@ -27,7 +28,7 @@ class _UploadPageState extends State<UploadPage> {
     captionController.dispose();
     super.dispose();
   }
-
+  
   Future<void> _pickImage() async {
     try {
       setState(() {

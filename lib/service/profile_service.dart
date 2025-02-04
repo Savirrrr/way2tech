@@ -12,6 +12,7 @@ class ProfileService {
         'POST',
         Uri.parse('$_baseUrl/api/profile/upload-image'),
       );
+      print("CALING------>");
 
       request.fields['email'] = email;
       request.files.add(
@@ -21,7 +22,7 @@ class ProfileService {
       var response = await request.send();
       var responseBody = await response.stream.bytesToString();
       var jsonResponse = json.decode(responseBody);
-
+      print("------------>${jsonResponse}");
       if (response.statusCode == 200) {
         return jsonResponse['imageUrl'];
       } else {

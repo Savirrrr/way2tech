@@ -7,6 +7,7 @@ const eventRoutes = require('./routes/event_routes');
 const uploadRoutes = require('./routes/upload_routes');
 const userRoutes = require('./routes/user_route');
 const { initializeDB } = require('./utils/db');
+const profileRoutes = require('./routes/profile_routes');
 
 const app = express();
 app.use(express.json());
@@ -23,6 +24,7 @@ async function startServer() {
         app.use('/api/media', mediaRoutes);
         app.use('/api/event', eventRoutes);
         app.use('/api/upload', uploadRoutes);
+        app.use('/api/profile', profileRoutes);
 
         const PORT = process.env.PORT || 3000;
         app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

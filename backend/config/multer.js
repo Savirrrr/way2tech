@@ -1,3 +1,4 @@
+// config/multer.js
 const multer = require('multer');
 const path = require('path');
 
@@ -11,22 +12,42 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const filetypes = /jpeg|jpg|png/;
-  const mimetype = filetypes.test(file.mimetype);
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  const allowedExtensions = ['.jpeg', '.jpg', '.png'];
   
-  if (mimetype && extname) {
-    return cb(null, true);
+  const ext = path.extname(file.originalname).toLowerCase();
+  
+  if (allowedMimeTypes.includes(file.mimetype) && allowedExtensions.includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error(`File type not allowed. Allowed types: ${allowedExtensions.join(', ')}`), false);
   }
-  cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
 };
 
 const upload = multer({ 
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
+    fileSize: 5 * 1024 * 1024 
   },
   fileFilter: fileFilter
 });
 
-module.exports = upload;
+const handleUploadError = (error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    return res.status(400).json({
+      message: 'Upload error',
+      error: error.message
+    });
+  } else if (error) {
+    return res.status(400).json({
+      message: 'Error uploading file',
+      error: error.message
+    });
+  }
+  next();
+};
+
+module.exports = {
+  upload,
+  handleUploadError
+};

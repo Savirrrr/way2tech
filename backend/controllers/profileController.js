@@ -3,8 +3,13 @@ const Profile = require('../models/profile');
 const profileController = {
   uploadImage: async (req, res) => {
     try {
+      console.log("compiling");
+      
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
+      }else{
+        console.log("file uploaded");
+        
       }
       
       const imageUrl = `/uploads/profiles/${req.file.filename}`;
@@ -14,18 +19,26 @@ const profileController = {
         { profileImageUrl: imageUrl },
         { upsert: true }
       );
-      
+      console.log('File details:', {
+        mimetype: req.file?.mimetype,
+        originalname: req.file?.originalname,
+        filename: req.file?.filename
+      });
       res.json({ 
         message: 'Profile image uploaded successfully',
         imageUrl: imageUrl
       });
     } catch (error) {
+      console.log(error);
+      
       res.status(500).json({ message: error.message });
     }
   },
 
   getProfile: async (req, res) => {
     try {
+      console.log('compiling');
+      
       const profile = await Profile.findOne({ email: req.params.email });
       
       if (!profile) {

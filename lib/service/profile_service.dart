@@ -28,6 +28,7 @@ class ProfileService {
         throw Exception(jsonResponse['message'] ?? 'Failed to upload image');
       }
     } catch (e) {
+      print(e);
       throw Exception('Error uploading profile image: $e');
     }
   }

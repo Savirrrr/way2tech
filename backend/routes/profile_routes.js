@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const profileController = require('../controllers/profileController');
-const upload = require('../config/multer');
+const  { upload, handleUploadError }  = require('../config/multer');
 
 router.post('/upload-image', 
-  upload.single('profileImage'), 
+  upload.single('profileImage'),
+  handleUploadError,  
   profileController.uploadImage
 );
 

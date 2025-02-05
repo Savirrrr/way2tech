@@ -8,8 +8,10 @@ const uploadRoutes = require('./routes/upload_routes');
 const userRoutes = require('./routes/user_route');
 const { initializeDB } = require('./utils/db');
 const profileRoutes = require('./routes/profile_routes');
-
+const path=require('path')
 const app = express();
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));

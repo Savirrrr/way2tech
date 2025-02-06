@@ -67,7 +67,6 @@ const profileController = {
       const imageUrl = `/uploads/profiles/${req.file.filename}`;
       console.log(`Generated image URL: ${imageUrl}`);
 
-      // Generate full URL for the image including host
       const fullImageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
       
       const updatedProfile = await profileOperations.updateProfile(

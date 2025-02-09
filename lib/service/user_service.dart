@@ -1,9 +1,11 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:way2techv1/models/user_model.dart';
 
 Future<UserModel> retrieveUserDetails(String email) async {
-  print("FLUTTER------------------>${email}");
+  print("FLUTTER------------------>$email");
   final url = Uri.parse('http://localhost:3000/api/user/getDetails');
 
   try {

@@ -8,7 +8,7 @@ import 'package:way2techv1/widget/navbar.dart';
 class UploadPage extends StatefulWidget {
   final String email;
 
-  const UploadPage({Key? key, required this.email}) : super(key: key);
+  const UploadPage({super.key, required this.email});
 
   @override
   State<UploadPage> createState() => _UploadPageState();
@@ -48,6 +48,7 @@ class _UploadPageState extends State<UploadPage> {
         });
       }
     } catch (e) {
+      // ignore: avoid_print
       print('Error picking image: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

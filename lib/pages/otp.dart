@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,8 +12,8 @@ class OTPVerificationPage extends StatefulWidget {
   final bool isRegistration;
   final String username;
 
-  OTPVerificationPage(
-      {required this.email,
+  const OTPVerificationPage(
+      {super.key, required this.email,
       required this.isRegistration,
       required this.username});
 
@@ -76,7 +78,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
       if (widget.isRegistration) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Loginpage()),
+          MaterialPageRoute(builder: (context) => const Loginpage()),
         );
       } else {
         Navigator.pushReplacement(
@@ -136,9 +138,9 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Verify OTP'),
+        title: const Text('Verify OTP'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -149,12 +151,12 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'Enter the OTP sent to your email to verify your account.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(
@@ -178,19 +180,19 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
                       }
                       setState(() {});
                     },
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       counterText: '',
                     ),
                   ),
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'A code has been sent to your email',
               style: TextStyle(fontSize: 14),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             GestureDetector(
               onTap: onResendPressed,
               child: Text(
@@ -203,18 +205,18 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
                 ),
               ),
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             ElevatedButton(
               onPressed:
                   otpControllers.any((controller) => controller.text.isEmpty)
                       ? null
                       : onConfirmPressed,
-              child: Text('Confirm'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.black,
-                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),
+              child: const Text('Confirm'),
             ),
           ],
         ),

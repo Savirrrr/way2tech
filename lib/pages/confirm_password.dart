@@ -101,11 +101,13 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
       final response = await AuthService.resetPassword(widget.email, passwordController.text);
 
       if (response == 200) {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Password updated successfully!'),
           ),
         );
+        // ignore: use_build_context_synchronously
         context.go('/login');
       } else {
         setState(() {

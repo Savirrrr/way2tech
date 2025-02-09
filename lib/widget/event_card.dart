@@ -8,13 +8,13 @@ class EventCard extends StatelessWidget {
   final String imageUrl;
 
   const EventCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.date,
     required this.time,
     required this.location,
     required this.imageUrl,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

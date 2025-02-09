@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:way2techv1/service/profile_service.dart';
@@ -9,11 +11,11 @@ class ProfileCard extends StatefulWidget {
   final String username;
 
   const ProfileCard({
-    Key? key,
+    super.key,
     required this.email,
     required this.fullName,
     required this.username,
-  }) : super(key: key);
+  });
 
   @override
   _ProfileCardState createState() => _ProfileCardState();
@@ -51,8 +53,8 @@ class _ProfileCardState extends State<ProfileCard> {
           child: Wrap(
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.photo_library),
-                title: Text('Add Image'),
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Add Image'),
                 onTap: () async {
                   Navigator.pop(context);
                   await _pickImage();
@@ -60,8 +62,8 @@ class _ProfileCardState extends State<ProfileCard> {
               ),
               if (_profileImage != null || _profileImageUrl != null)
                 ListTile(
-                  leading: Icon(Icons.delete),
-                  title: Text('Remove Image'),
+                  leading: const Icon(Icons.delete),
+                  title: const Text('Remove Image'),
                   onTap: () {
                     Navigator.pop(context);
                     setState(() {
@@ -104,6 +106,7 @@ class _ProfileCardState extends State<ProfileCard> {
         });
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error uploading image: $e')),
       );
@@ -134,9 +137,9 @@ class _ProfileCardState extends State<ProfileCard> {
                             ? FileImage(_profileImage!) as ImageProvider
                             : null),
                     child: _isLoading
-                        ? CircularProgressIndicator()
+                        ? const CircularProgressIndicator()
                         : (_profileImage == null && _profileImageUrl == null
-                            ? Icon(Icons.person, size: 50, color: Colors.white)
+                            ? const Icon(Icons.person, size: 50, color: Colors.white)
                             : null),
                   ),
                   Positioned(
@@ -145,7 +148,7 @@ class _ProfileCardState extends State<ProfileCard> {
                     child: GestureDetector(
                       onTap: _isLoading ? null : _showImageOptions,
                       child: Container(
-                        padding: EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           color: Colors.black,
                           shape: BoxShape.circle,
@@ -154,7 +157,7 @@ class _ProfileCardState extends State<ProfileCard> {
                             width: 2,
                           ),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.camera_alt,
                           size: 16,
                           color: Colors.white,
@@ -164,14 +167,14 @@ class _ProfileCardState extends State<ProfileCard> {
                   ),
                 ],
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       widget.fullName,
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       widget.username,
@@ -181,7 +184,7 @@ class _ProfileCardState extends State<ProfileCard> {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.edit),
+                icon: const Icon(Icons.edit),
                 onPressed: () {
                   // Implement edit profile functionality
                 },

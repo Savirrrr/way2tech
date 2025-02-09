@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:password_strength/password_strength.dart';
 import 'package:way2techv1/pages/login_page.dart';

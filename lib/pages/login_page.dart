@@ -36,9 +36,11 @@ class _LoginpageState extends State<Loginpage> {
 
     if (isSuccess) {
       // Navigate to home page and pass email
+      // ignore: use_build_context_synchronously
       context.go('/home', extra: email);
     } else {
       // Login failed, show error message
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid email or password')),
       );

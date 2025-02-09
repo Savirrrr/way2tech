@@ -27,10 +27,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     });
 
     if (isSuccessful) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP sent to email!')),
       );
       Navigator.push(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
             builder: (context) => OTPVerificationPage(
@@ -40,6 +42,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 )),
       );
     } else {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid email')),
       );

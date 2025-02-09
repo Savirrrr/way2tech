@@ -3,7 +3,7 @@ import 'package:way2techv1/widget/navbar.dart';
 
 class TabSwitchingPage extends StatefulWidget {
   final String email;
-  TabSwitchingPage({required this.email});
+  const TabSwitchingPage({super.key, required this.email});
   @override
   // ignore: library_private_types_in_public_api
   _TabSwitchingPageState createState() => _TabSwitchingPageState();

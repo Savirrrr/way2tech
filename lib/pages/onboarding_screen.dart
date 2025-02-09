@@ -33,7 +33,7 @@ class OnboardingScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Text(
+                      const Text(
                         'Follow the latest news\ninformation every day',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -42,8 +42,8 @@ class OnboardingScreen extends StatelessWidget {
                           color: Colors.black, // Ensure text is readable on the black background
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
+                      const SizedBox(height: 10),
+                      const Text(
                         'Turn on notifications for daily updates',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -51,20 +51,20 @@ class OnboardingScreen extends StatelessWidget {
                           color: Colors.black, // Lighter grey for better contrast
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () => _navigateToLoginSignup(context),
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 60, vertical: 15),
                           backgroundColor: Colors.black,
                         ),
-                        child: Text(
+                        child: const Text(
                           'Get Started',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
-                      SizedBox(height: 40), // Space below the button
+                      const SizedBox(height: 40), // Space below the button
                     ],
                   ),
                 ),

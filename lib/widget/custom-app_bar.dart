@@ -1,10 +1,12 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +31,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            child: Row(
-              children: const [
+            child: const Row(
+              children: [
                 Text('REFER NOW'),
                 Icon(Icons.arrow_forward), // No space after the icon
               ],

@@ -12,7 +12,7 @@ class UploadForm extends StatelessWidget {
   final VoidCallback? onUpload;
 
   const UploadForm({
-    Key? key,
+    super.key,
     required this.titleController,
     required this.captionController,
     this.imageFile,
@@ -21,7 +21,7 @@ class UploadForm extends StatelessWidget {
     required this.onAcceptTerms,
     required this.onUpload,
     this.isLoading = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

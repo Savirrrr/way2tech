@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
@@ -80,7 +82,7 @@ class OTPService {
     int remainingTime = duration;
     Timer? timer;
 
-    timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (remainingTime > 0) {
         remainingTime--;
         onTimeUpdate(remainingTime);

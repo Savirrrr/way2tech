@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:way2techv1/models/user_model.dart';
@@ -10,9 +12,11 @@ import 'package:go_router/go_router.dart';
 class AccountPage extends StatefulWidget {
   final String? email;
 
+  // ignore: use_super_parameters
   const AccountPage({Key? key, this.email}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _AccountPageState createState() => _AccountPageState();
 }
 
@@ -51,6 +55,7 @@ class _AccountPageState extends State<AccountPage> {
             isLoading = false;
           });
         } catch (e) {
+          // ignore: avoid_print
           print("Error loading user details: $e");
           setState(() {
             userDetails = UserModel(
@@ -68,6 +73,7 @@ class _AccountPageState extends State<AccountPage> {
         context.go('/login');
       }
     } catch (e) {
+      // ignore: avoid_print
       print("Error in loadEmailAndUserDetails: $e");
       setState(() {
         isLoading = false;
@@ -83,11 +89,14 @@ class _AccountPageState extends State<AccountPage> {
   Future<void> _logout() async {
     try {
       await clearUserEmail();
+      // ignore: use_build_context_synchronously
       context.go('/login');
     } catch (e) {
+      // ignore: avoid_print
       print("Error during logout: $e");
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error logging out. Please try again.')),
+        const SnackBar(content: Text('Error logging out. Please try again.')),
       );
     }
   }
@@ -99,7 +108,7 @@ class _AccountPageState extends State<AccountPage> {
         automaticallyImplyLeading: false,
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -110,52 +119,52 @@ class _AccountPageState extends State<AccountPage> {
                       fullName: "${userDetails!.firstName} ${userDetails!.lastName}",
                       username: userDetails!.username,
                     ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Expanded(
                     child: ListView(
                       children: [
                         ListTile(
-                          leading: Icon(Icons.person),
-                          title: Text('Personal information'),
+                          leading: const Icon(Icons.person),
+                          title: const Text('Personal information'),
                           onTap: () {
                             // Navigate to personal information page
                           },
                         ),
                         Divider(thickness: 1.0, color: Colors.grey.shade300),
                         ListTile(
-                          leading: Icon(Icons.language),
-                          title: Text('Language'),
-                          trailing: Text('English (US)'),
+                          leading: const Icon(Icons.language),
+                          title: const Text('Language'),
+                          trailing: const Text('English (US)'),
                           onTap: () {
                             // Navigate to language settings page
                           },
                         ),
                         Divider(thickness: 1.0, color: Colors.grey.shade300),
                         ListTile(
-                          leading: Icon(Icons.policy),
-                          title: Text('Privacy Policy'),
+                          leading: const Icon(Icons.policy),
+                          title: const Text('Privacy Policy'),
                           onTap: () {
                             // Navigate to privacy policy page
                           },
                         ),
                         Divider(thickness: 1.0, color: Colors.grey.shade300),
                         ListTile(
-                          leading: Icon(Icons.help_center),
-                          title: Text('Help center'),
+                          leading: const Icon(Icons.help_center),
+                          title: const Text('Help center'),
                           onTap: () {
                             // Navigate to help center page
                           },
                         ),
                         Divider(thickness: 1.0, color: Colors.grey.shade300),
                         ListTile(
-                          leading: Icon(Icons.settings),
-                          title: Text('Setting'),
+                          leading: const Icon(Icons.settings),
+                          title: const Text('Setting'),
                           onTap: () {
                             // Navigate to settings page
                           },
                         ),
                         Divider(thickness: 1.0, color: Colors.grey.shade300),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         LogoutButton(onLogout: _logout),
                       ],
                     ),

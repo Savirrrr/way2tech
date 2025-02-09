@@ -1,4 +1,3 @@
-// start_page.dart
 import 'package:flutter/material.dart';
 import 'package:way2techv1/pages/login_page.dart';
 import 'package:way2techv1/pages/sign_up.dart';
@@ -29,7 +28,7 @@ class StartPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Loginpage()),
+                  MaterialPageRoute(builder: (context) => const Loginpage()),
                 );
               },
               verticalPadding: 15,
@@ -43,7 +42,7 @@ class StartPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SignUpPage()),
+                  MaterialPageRoute(builder: (context) => const SignUpPage()),
                 );
               },
               verticalPadding: 15,
@@ -96,7 +95,7 @@ class StartPage extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => SignUpPage()),
+                        MaterialPageRoute(builder: (context) => const SignUpPage()),
                       );
                     },
                     child: const Text(

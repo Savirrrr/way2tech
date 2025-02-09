@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:way2techv1/models/upload_model.dart';
 import 'package:way2techv1/service/api_service.dart';
@@ -18,7 +20,7 @@ class _FlipPageViewState extends State<FlipPageView> {
   final PageController _pageController = PageController();
   final ApiService _apiService = ApiService();
 
-  List<UploadData> _pagesData = [];
+  final List<UploadData> _pagesData = [];
   bool isLoading = true;
   ReverseNumberGenerator? rng;
 
@@ -34,6 +36,7 @@ class _FlipPageViewState extends State<FlipPageView> {
       rng = ReverseNumberGenerator(maxIndex - 1);
       await _fetchData();
     } catch (e) {
+      // ignore: avoid_print
       print("Error: $e");
     }
   }
@@ -52,6 +55,7 @@ class _FlipPageViewState extends State<FlipPageView> {
             });
           }
         } catch (e) {
+          // ignore: avoid_print
           print("Error: $e");
           setState(() {
             isLoading = false;

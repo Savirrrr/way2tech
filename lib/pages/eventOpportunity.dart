@@ -5,9 +5,10 @@ import 'package:way2techv1/widget/opportunity_card.dart';
 
 class Eventopprotunities extends StatefulWidget {
   final String email;
-  const Eventopprotunities({required this.email});
+  const Eventopprotunities({super.key, required this.email});
 
   @override
+  // ignore: library_private_types_in_public_api
   _EventopprotunitiesState createState() => _EventopprotunitiesState();
 }
 
@@ -93,7 +94,7 @@ class _EventopprotunitiesState extends State<Eventopprotunities> {
 }
 
 class EventsList extends StatelessWidget {
-  const EventsList({Key? key}) : super(key: key);
+  const EventsList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +115,7 @@ class EventsList extends StatelessWidget {
 }
 
 class OpportunitiesList extends StatelessWidget {
-  const OpportunitiesList({Key? key}) : super(key: key);
+  const OpportunitiesList({super.key});
 
   @override
   Widget build(BuildContext context) {

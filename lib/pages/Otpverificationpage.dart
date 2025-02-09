@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:way2techv1/pages/confirm_password.dart';
 import 'package:way2techv1/service/otp_service.dart';

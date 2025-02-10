@@ -46,7 +46,6 @@ class MyApp extends StatelessWidget {
           );
         }
 
-        // final initialRoute = snapshot.data ?? '/';
         
         
 final GoRouter router = GoRouter(

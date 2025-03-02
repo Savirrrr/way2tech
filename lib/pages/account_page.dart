@@ -172,6 +172,13 @@ class _AccountPageState extends State<AccountPage> {
                 ],
               ),
             ),
+
+
+
+
+
+
+            
       bottomNavigationBar: currentEmail != null
           ? Navbar(
               email: currentEmail!,
